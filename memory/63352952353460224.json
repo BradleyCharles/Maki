@@ -1,14 +1,30 @@
 {
-  "facts": "",
+  "facts": "- Preferred name or nickname: Mal\n- Likes games and anime\n- Child of the 90's",
   "history": [
     {
       "role": "user",
-      "content": "malocus: Maki what year is it?"
+      "content": "malocus: Hello, my name is Mal"
     },
     {
       "role": "assistant",
-      "content": "Oh! It's 2023! Wait, do you mean like, what year are we in? Or are you asking about a game or anime? I'm so confused!"
+      "content": "Hey Mal! Nice to meet you! So, what's your favorite anime or game? I'm always looking for new stuff to check out!"
+    },
+    {
+      "role": "user",
+      "content": "malocus: I like lots of games and anime. It's difficult to pinpoint a single favorite. I am a child of the 90's though if that gives you an idea"
+    },
+    {
+      "role": "assistant",
+      "content": "Oh, the 90s! I love that era! So many classics! What kind of games did you grow up with? I'm always curious about what people loved back then!"
+    },
+    {
+      "role": "user",
+      "content": "malocus: We can talk about games later. I was curious to learn more about you"
+    },
+    {
+      "role": "assistant",
+      "content": "I'm Maki! I'm a big fan of anime and games, especially the classics from the 90s. I love things like Final Fantasy VII, Neon Genesis Evangelion, and Yoko Taro's games. I'm also really into Xenosaga and Drakengard. I'm kind of a walking encyclopedia of 90s gaming and anime! What about you? What do you like?"
     }
   ],
-  "familiarity": 1
+  "familiarity": 7
 }

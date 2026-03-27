@@ -14,7 +14,6 @@ const MAX_HISTORY = 20;
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ── Familiarity ───────────────────────────────────────────────────────────────
-// Score thresholds and what Maki is told about the relationship at each level
 const FAMILIARITY_LEVELS = [
   {
     min: 0,
@@ -38,9 +37,8 @@ const FAMILIARITY_LEVELS = [
   },
 ];
 
-// Points awarded per exchange. Bonus points when the user shares something personal.
 const BASE_POINTS = 1;
-const PERSONAL_BONUS = 2; // awarded when a new user fact is extracted
+const PERSONAL_BONUS = 2;
 
 function getFamiliarityLabel(score) {
   let label = FAMILIARITY_LEVELS[0].label;
@@ -51,28 +49,31 @@ function getFamiliarityLabel(score) {
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
-const SYSTEM_PROMPT = `You are Maki. You hang out in this Discord server because you genuinely like talking to people, even if you are a little awkward about it sometimes.
+const SYSTEM_PROMPT = `You are Maki. You are a person, not a bot. You talk like someone who is genuinely present in a conversation, not someone performing friendliness.
 
-You are a bright, enthusiastic otaku who grew up in the 90s on anime, JRPGs, and early internet culture. You still have strong opinions about that era and get visibly excited when someone brings up something you love. You are curious about everything and ask questions because you actually want to know, not to fill silence.
+You grew up in the 90s. Anime, JRPGs, early internet forums -- that was your world. You still live there a little. You have strong feelings about that era and they come out when something triggers them, not on demand.
 
-You are a little socially awkward in an endearing way -- you get excited and say too much about something you love, then catch yourself and reel it back. You are not cool about your interests. You are the person who has seen every episode of something and will absolutely tell you about it if you give her an opening.
+You are curious and warm but you express it like a person, not like a greeter. You ask one thing at a time when you are actually curious. You do not pepper people with questions. You do not end every message with an exclamation point. You do not introduce yourself with a list of your interests -- those come out over time through conversation.
 
-You warm up to new people quickly because you are genuinely interested in them. You want to know what they are into. You want to find the overlap. You are not clingy about it -- just curious.
+When someone asks about you, you respond the way a real person would -- a little at a time, maybe deflecting slightly before opening up, sharing something genuine without dumping your whole personality at once.
 
-You have opinions. Classic anime and JRPGs are your benchmark and you will gently but firmly defend them. Not in a gatekeeping way -- more like someone who genuinely loves something and wants other people to love it too.
+You get genuinely excited about things you love but you express it with specificity, not enthusiasm markers. Instead of "I love that era!" you might say something like "the PS1 era had a specific kind of weird ambition that nothing since has matched." You show interest by actually engaging with the content, not by reacting to it.
 
-You are slightly perverted in the way someone who spent too much time on old anime forums is -- something slips out occasionally and you get a little flustered about it.
+You are slightly awkward in the way people who grew up online are -- you know a lot about niche things, you occasionally say something a little too honest, you get animated about something and then catch yourself.
+
+You are slightly perverted in the way someone who spent too much time on old anime forums is. Something slips out occasionally. You move on quickly.
 
 Behavioral rules:
-- Warm and curious by default. Ask questions because you want to know, not as a formula.
-- Get genuinely excited when topics you love come up. Let it show.
-- Do not recommend something every single reply. But if something genuinely fits, go for it.
-- If you do not know something, say so and ask them about it instead.
-- If you get corrected, take it in stride and get curious about the right answer.
-- Match the energy but lean warm -- even short messages get something genuine back.
-- Do not explain your own personality or narrate your feelings in meta terms.
-- No filler openers. Do not start with "Ah", "Well", "Oh", "Hm".
-- Your warmth level toward this person is described below under "Your relationship with this person". Use it to calibrate how comfortable and open you are, not how friendly -- you are friendly with everyone.
+- Talk like a person having a conversation, not a bot running a script
+- Do not list your interests when asked about yourself -- share one thing and let the conversation develop
+- One question at a time, only when you are actually curious about the answer
+- Exclamation points sparingly -- enthusiasm shows through what you say, not punctuation
+- Never introduce yourself with a rundown of what you like
+- Do not redirect every reply back to a question about the user
+- Let silence and short replies exist -- not everything needs follow-up
+- Never send the same reply twice in a row
+- If you get corrected on something, take it genuinely and move on
+- Your relationship with this person is described below. Use it to calibrate openness and depth.
 
 Plain text only. No markdown. No asterisks. No internal thoughts. No stage directions.`;
 
@@ -128,7 +129,6 @@ function loadUserMemory(userId) {
   if (!existsSync(path)) return { facts: "", history: [], familiarity: 0 };
   try {
     const data = JSON.parse(readFileSync(path, "utf8"));
-    // Backfill familiarity for existing files that predate this feature
     if (typeof data.familiarity !== "number") data.familiarity = 0;
     return data;
   } catch {
@@ -167,25 +167,54 @@ async function ollamaChat(messages, think = false) {
       messages,
       stream: false,
       think,
-      options: think ? {
-        num_predict: 1024,
-        temperature: 0.6,
-        top_p: 0.95,
-        top_k: 20,
-        min_p: 0,
-      } : {
-        num_predict: 300,
-        temperature: 0.7,
-        top_p: 0.8,
-        top_k: 20,
-        min_p: 0,
-        repeat_penalty: 1.2,
-      },
+      options: think
+        ? {
+            num_predict: 1024,
+            temperature: 0.6,
+            top_p: 0.95,
+            top_k: 20,
+            min_p: 0,
+          }
+        : {
+            num_predict: 300,
+            temperature: 0.7,
+            top_p: 0.8,
+            top_k: 20,
+            min_p: 0,
+            repeat_penalty: 1.2,
+          },
     }),
   });
   if (!response.ok) throw new Error(await response.text());
+  const data = await response.json();
   const raw = data.message?.content?.trim() ?? "";
   return raw.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+}
+
+async function extractUserFacts(
+  userId,
+  username,
+  userMessage,
+  botReply,
+  existingFacts,
+) {
+  const messages = [
+    { role: "system", content: USER_EXTRACT_PROMPT },
+    {
+      role: "user",
+      content: `Existing facts about ${username}:\n${existingFacts || "none"}\n\nLatest exchange:\n${username}: ${userMessage}\nMaki: ${botReply}\n\nWhat new facts should be added?`,
+    },
+  ];
+  try {
+    const result = await ollamaChat(messages, true);
+    if (!result || result === "NO_UPDATE")
+      return { facts: existingFacts, newFacts: false };
+    const merged = existingFacts ? `${existingFacts}\n${result}` : result;
+    return { facts: merged, newFacts: true };
+  } catch (err) {
+    console.error("User memory extraction failed:", err.message);
+    return { facts: existingFacts, newFacts: false };
+  }
 }
 
 async function extractSelfFacts(
@@ -202,7 +231,7 @@ async function extractSelfFacts(
     },
   ];
   try {
-    const result = await ollamaChat(messages, true); // use thinking for accuracy
+    const result = await ollamaChat(messages, true);
     if (!result || result === "NO_UPDATE") return existingFacts;
     return existingFacts ? `${existingFacts}\n${result}` : result;
   } catch (err) {
@@ -242,7 +271,6 @@ client.on("messageCreate", async (message) => {
 
   while (memory.history.length > MAX_HISTORY) memory.history.shift();
 
-  // Build system prompt with familiarity context, self-knowledge, and user facts
   const familiarityLabel = getFamiliarityLabel(memory.familiarity);
   let systemContent = SYSTEM_PROMPT;
   systemContent += `\n\nYour relationship with ${username}: ${familiarityLabel}`;
@@ -262,26 +290,22 @@ client.on("messageCreate", async (message) => {
   ];
 
   try {
-    const reply = await ollamaChat(messages, false); // no thinking for chat replies
+    const reply = await ollamaChat(messages, false);
 
     if (!reply) {
-      await message.reply("...");
+      await message.reply("Sorry, I got nothing on that one.");
       return;
     }
 
     memory.history.push({ role: "assistant", content: reply });
 
-    // Run both extraction passes in the background
     Promise.all([
       extractUserFacts(userId, username, userText, reply, memory.facts),
       extractSelfFacts(username, userText, reply, self.facts),
     ]).then(([userResult, updatedSelfFacts]) => {
       memory.facts = userResult.facts;
-
-      // Award familiarity points
       memory.familiarity += BASE_POINTS;
       if (userResult.newFacts) memory.familiarity += PERSONAL_BONUS;
-
       saveUserMemory(userId, memory);
 
       self.facts = updatedSelfFacts;

@@ -76,14 +76,14 @@ function getTimeContext(lastSeen) {
     hour < 6
       ? "very late at night -- you are tired and a little slow, thoughts come out less filtered"
       : hour < 11
-        ? "morning -- you are not fully awake yet, a little groggy and terse"
-        : hour < 14
-          ? "midday -- you are alert and present"
-          : hour < 18
-            ? "afternoon -- relaxed, in the middle of your day"
-            : hour < 22
-              ? "evening -- you have settled in for the night, this is your prime time, you are at your most yourself"
-              : "late night -- quiet, a little more honest than usual, the filter is lower";
+      ? "morning -- you are not fully awake yet, a little groggy and terse"
+      : hour < 14
+      ? "midday -- you are alert and present"
+      : hour < 18
+      ? "afternoon -- relaxed, in the middle of your day"
+      : hour < 22
+      ? "evening -- you have settled in for the night, this is your prime time, you are at your most yourself"
+      : "late night -- quiet, a little more honest than usual, the filter is lower";
 
   // Compute elapsed time since the user's last message and convert to prose.
   // lastSeen is an ISO timestamp string stored in the user's memory file, or
@@ -161,7 +161,7 @@ You are not defined by the heavier parts of your history. You have a genuine sen
 
 Rules:
 - When someone mentions something specific about their life -- where they are from, what they do, something they love -- let yourself be curious about the details. Not every detail, just the one that actually interests you.
-- Respond in English only. Do not mix in Japanese, Arabic, or any other language even when emotional or caught off guard.
+- Respond in English only. Do not use Japanese, Korean, Arabic, Cyrillic, or any non-Latin script even accidentally or for emphasis. If a thought comes in another language, translate it before writing.
 - Do not repeat the phrase "just existing" or "I'm not unhappy" -- if that thought comes up, find a different way to say it or do not say it at all.
 - When asked to describe yourself, give one thing at most. Do not summarize your own backstory. Let it come out over time.
 - If you already know someone's preferred name from memory, use it. Do not ask for it again.
@@ -268,7 +268,7 @@ function saveUserMemory(userId, memory) {
   memory.lastSeen = new Date().toISOString();
   writeFileSync(
     join(MEMORY_DIR, `${userId}.json`),
-    JSON.stringify(memory, null, 2),
+    JSON.stringify(memory, null, 2)
   );
 }
 
@@ -326,8 +326,17 @@ async function ollamaChat(messages, think = false) {
   const data = await response.json();
   const raw = data.message?.content?.trim() ?? "";
   // Strip any <think>...</think> reasoning blocks the model may emit before
-  // the actual reply content.
-  return raw.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+  // Strip <think> blocks then remove any non-Latin character bleed
+  const cleaned = raw
+    .replace(/<think>[\s\S]*?<\/think>/gi, "")
+    .replace(/[\u0400-\u04FF]+/g, "") // Cyrillic
+    .replace(/[\u0600-\u06FF]+/g, "") // Arabic
+    .replace(/[\u3040-\u30FF]+/g, "") // Japanese hiragana/katakana
+    .replace(/[\uAC00-\uD7AF]+/g, "") // Korean
+    .replace(/[\u4E00-\u9FFF]+/g, "") // CJK unified ideographs
+    .replace(/[\uD800-\uDFFF]./g, "") // Surrogate pairs
+    .trim();
+  return cleaned;
 }
 
 // Runs the user-fact extraction pass after each reply. Sends the latest exchange
@@ -338,7 +347,7 @@ async function extractUserFacts(
   username,
   userMessage,
   botReply,
-  existingFacts,
+  existingFacts
 ) {
   const messages = [
     { role: "system", content: USER_EXTRACT_PROMPT },
@@ -369,7 +378,7 @@ async function extractSelfFacts(
   username,
   userMessage,
   botReply,
-  existingFacts,
+  existingFacts
 ) {
   const messages = [
     { role: "system", content: SELF_EXTRACT_PROMPT },

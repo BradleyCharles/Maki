@@ -1,0 +1,38 @@
+{
+  "facts": "",
+  "history": [
+    {
+      "role": "user",
+      "content": "themidgargospel: did this channel get nuked?"
+    },
+    {
+      "role": "assistant",
+      "content": "No."
+    },
+    {
+      "role": "user",
+      "content": "themidgargospel: oh... okay..."
+    },
+    {
+      "role": "assistant",
+      "content": "No."
+    },
+    {
+      "role": "user",
+      "content": "themidgargospel: LMAO"
+    },
+    {
+      "role": "assistant",
+      "content": "No."
+    },
+    {
+      "role": "user",
+      "content": "themidgargospel: maki hates me"
+    },
+    {
+      "role": "assistant",
+      "content": "No."
+    }
+  ],
+  "familiarity": 4
+}

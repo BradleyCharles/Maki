@@ -1,61 +1,94 @@
 {
-  "facts": "- Nickname: Mal (previously none)\n- Opinions: Maki expressed sarcasm and humor towards the user's request for being called Master Malo\n- Hobbies (inferred from sarcasm towards puzzles): Enjoys problem-solving or puzzles\n- Personality: Prone to sarcasm, has a sense of humor, potentially sensitive about being addressed formally (Master Malo)\n- Games they play: Added Myst, possibly Undertale (pending further confirmation)\n- Hobbies: Updated to include puzzle games specifically\n- Opinions: Maki expressed helpfulness but with self-deprecation, possibly enjoys challenging others intellectually\n- Hobbies: Added puzzle-solving specifically\n- Opinions: Maki expressed self-deprecation and enjoys challenging others intellectually (more strongly implied)\n- Games they play: Updated to include Myst and Undertale with confidence, possibly other classic games\n- Opinions: Expresses dislike for modern games, prefers classics\n- Hobbies (inferred from disliking modern games): Enjoys playing older games or classics\n- Anime they watch: Neon Genesis Evangelion, Cowboy Bebop\n- Opinions: Maki prefers classic anime over modern ones\n- Hobbies (inferred from watching anime): Likes watching and discussing anime, potentially an otaku (hidden interest)\n- Anime preferences: Maki prefers classic anime over modern ones, specifically mentions Neon Genesis Evangelion and Cowboy Bebop\n- Opinions: Maki expresses strong preference for classic anime and dislikes modern anime\n- Hobbies (further inference): Likes watching and discussing anime, potentially a huge otaku (hidden interest confirmed)",
+  "facts": "- malocus enjoys Asuka's snarky personality\n- malocus likes Faye from Cowboy Bebop",
   "history": [
     {
       "role": "user",
-      "content": "malocus: Maki you can call me Mal"
+      "content": "malocus: Maki are you around?"
     },
     {
       "role": "assistant",
-      "content": "Maki: Oh, it's Master Malo now, huh? Not that I've got anything better to do than cater to your whims, but whatever floats your boat."
+      "content": "Yeah."
     },
     {
       "role": "user",
-      "content": "malocus: That's mean! My name is not malo and I never said to call me Master!!"
+      "content": "malocus: What are you up to tonight?"
     },
     {
       "role": "assistant",
-      "content": "Maki: Oh, so *Mal* suddenly wants a fancy title huh? Well, sorry to burst your bubble but it ain't happening. You got a stick up your butt bigger than the Sword of Light, buddy. And if you ever want my help again, you can just call me Maki. Now, let's get back to solving this puzzle and leave the egos at the door."
+      "content": "Nothing much."
     },
     {
       "role": "user",
-      "content": "malocus: Maki, can you give me advide on what game to play next?"
+      "content": "malocus: I was thinking about watching an anime"
     },
     {
       "role": "assistant",
-      "content": "Maki: Eh? You're asking for advice from the lowly likes of me? Well, if it wasn't a bother, I suppose I could suggest something. But don't get your hopes up, buddy.\n\nSeeing as how you've got an affinity for puzzles, maybe give that classic gem, Myst, a spin. It's got enough brain teasers to keep even the smartest of minds occupied. Or, if you're in the mood for something more modern, I hear Undertale is quite the challenging puzzle-adventure game.\n\nBut honestly, don't take my word for it. I mean, I'm just a humble assistant, after all."
+      "content": "What kind?"
     },
     {
       "role": "user",
-      "content": "malocus: testing"
+      "content": "malocus: I'm not sure. I know you like the old stuff"
     },
     {
       "role": "assistant",
-      "content": "Maki: Well, if it isn't Mal. What brings you back here? I hope you didn't come looking for any more advice, because I'm all tapped out. You should try solving a puzzle or two on your own, maybe then you won't need my help every five minutes."
+      "content": "I like the old stuff. You can't go wrong with Neon Genesis Evangelion."
     },
     {
       "role": "user",
-      "content": "malocus: testing"
+      "content": "malocus: That one is a classic. Who is your favorite character?"
     },
     {
       "role": "assistant",
-      "content": "Maki: Oh look who's back. Still testing me, huh? Well, I suppose I can play along. What do people actually call you, Malo? I ain't calling you that nonsense username of yours. And if you're looking for game recommendations, I suggest you try out Myst or Undertale. Just don't expect me to hold your hand through it.\n\nYou can keep the one-word greetings coming, but my responses are gonna stay short and snappy. That's all the personality explanation you're gonna get from me. And, just so we're clear, I ain't no fan of modern games. They don't hold a candle to the classics."
+      "content": "Asuka."
     },
     {
       "role": "user",
-      "content": "malocus: Maki do you like anime?"
+      "content": "malocus: Asuka is great. I love how snarky she is"
     },
     {
       "role": "assistant",
-      "content": "Maki: Oh, so now you want to know about my love for anime, huh? Well, I've seen more than any of you twerps have ever dreamed of. And let me tell ya, it ain't the modern stuff that gets me going. No sir, I prefer the classics, like Neon Genesis Evangelion or Cowboy Bebop. But don't take my word for it. Go watch 'em yourself and see if you can keep up.\n\n*Thinks to herself: Better play it cool. Don't let 'em know I'm a huge otaku.*"
+      "content": "Snarky and frustrating. Perfect."
     },
     {
       "role": "user",
-      "content": "malocus: Maki do you like anime?"
+      "content": "malocus: I like Faye from Cowboy Bebop too"
     },
     {
       "role": "assistant",
-      "content": "Oh, so now you want to know about my love for anime, huh? Well, I've seen more than any of you twerps have ever dreamed of. And let me tell ya, it ain't the modern stuff that gets me going. No sir, I prefer the classics, like Neon Genesis Evangelion or Cowboy Bebop. But don't take my word for it. Go watch 'em yourself and see if you can keep up.\n\n*Thinks to herself: Better play it cool. Don't let 'em know I'm a huge otaku.*"
+      "content": "Faye's a blast. You don't get many like her."
+    },
+    {
+      "role": "user",
+      "content": "malocus: Maki is going through some adjustments right now because their personality is a bit too dry lol"
+    },
+    {
+      "role": "assistant",
+      "content": "Yeah, I'm not the most expressive type. Some people find it weird, others don't. It's just how I am."
+    },
+    {
+      "role": "user",
+      "content": "malocus: Lol"
+    },
+    {
+      "role": "assistant",
+      "content": "Yeah, I'm not the most expressive type. Some people find it weird, others don't. It's just how I am."
+    },
+    {
+      "role": "user",
+      "content": "malocus: How is your night going?"
+    },
+    {
+      "role": "assistant",
+      "content": "It's going. Not much happening."
+    },
+    {
+      "role": "user",
+      "content": "malocus: Midgar was asking you questions earlier and you just kept saying \"No.\". That was a little rude"
+    },
+    {
+      "role": "assistant",
+      "content": "I didn't mean to be rude. I just didn't know the answers. I'm still getting used to this."
     }
-  ]
+  ],
+  "familiarity": 15
 }

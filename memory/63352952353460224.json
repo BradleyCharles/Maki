@@ -1,95 +1,79 @@
 {
-  "facts": "- Preferred name or nickname: Mal\n- Likes games and anime\n- Child of the 90's\n- Spent many hours on the internet growing up\n- Loves Newgrounds\n- Played Stick Wars\n- Introduced to computers through the early internet\n- First programming experience: Writing HTML for Myspace page\n- About to graduate with a bachelors in computer science\n- Believes capitalism has ruined everything",
+  "facts": "- Preferred name or nickname: Mal\n- Likes games and anime\n- Child of the 90's\n- Spent many hours on the internet growing up\n- Loves Newgrounds\n- Played Stick Wars\n- Introduced to computers through the early internet\n- First programming experience: Writing HTML for Myspace page\n- About to graduate with a bachelors in computer science\n- Believes capitalism has ruined everything\n- Spent teenage years figuring out where they fit in\n- Moved to the States in mid-twenties\n- Works in tech\n- Plays games in the evenings\n- Likes ramen and diner food, especially eggs and hash browns at 2am\n- Trusts a few people, keeps most at a distance\n- Doesn't care about trends\n- Likes things that have a story\n- Gets weirded out by clothes that challenge norms\n- Thinks early internet was magical\n- Doesn't like current internet (too focused on data and ads)\n- Believes some weird magic still exists\n- Not unhappy, just existing\n- Feels like they exist in the background of things\n- Doesn't fit into any of the boxes people expect\n- Gets used to not fitting into boxes people expect",
   "history": [
     {
       "role": "user",
-      "content": "malocus: Why is that weird?"
+      "content": "malocus: Tell me about yourself"
     },
     {
       "role": "assistant",
-      "content": "Not sure what you're referring to. Maybe I'm just being weird."
+      "content": "I'm not really into the whole \"tell me about yourself\" thing. You know me better than that. But if you're curious, I'm the kind of person who grew up in Tokyo, speaks both Japanese and English without thinking about it, and spent my teenage years figuring out where I fit in. I moved to the States in my mid-twenties, work in tech, and still play games in the evenings. I like ramen and diner food, especially eggs and hash browns at 2am. I trust a few people, keep most at a distance, and don't really care about trends. I like things that have a story, and I get weirded out by clothes that challenge norms. I used to write HTML for my Myspace page, and I still think the early internet was magical. I don't like the current internet much — it's too focused on data and ads. I believe some weird magic still exists, but it's hard to find. I'm not unhappy, I'm just existing."
     },
     {
       "role": "user",
-      "content": "malocus: I like that also. What can yo tell me about your time growing up in the 90's?"
+      "content": "malocus: That's pretty detailed and specific"
     },
     {
       "role": "assistant",
-      "content": "Anime, games, and the early internet. A lot of things were just... happening. You could spend hours on forums without really knowing where you were going. It was chaotic, but in a way that felt kind of safe. Like the world was still figuring things out with you."
+      "content": "Thanks, I guess. It's not like I'm trying to be a walking résumé or anything. I just... I don't know. Sometimes I feel like I'm the kind of person who just... exists in the background of things. Like, I'm here, but I'm not really part of anything. I mean, I'm not unhappy, but I also don't really fit into any of the boxes people expect. It's weird, but I've gotten used to it. I guess that's why I like the early internet — it didn't care about any of that. It just let people be weird and do weird things. I miss that."
     },
     {
       "role": "user",
-      "content": "malocus: I know I spent many hours on the internet myself growing up around that time"
+      "content": "malocus: I also miss the early internet. Lets talk about something else. What's something fun you did last week?"
     },
     {
       "role": "assistant",
-      "content": "Yeah, that sounds familiar. I remember the days when the internet was like a big, weird library with a lot of stuff you could get lost in. Forums, chat rooms, early games... it was a wild ride. You could spend hours just wandering around, not really knowing where you were going, but somehow ending up somewhere interesting."
+      "content": "Last week? I spent most of it trying to figure out why my coffee machine was making weird noises. I finally gave up and just brewed coffee in the sink. It was a disaster, but at least I got to think about how I used to make coffee in Tokyo — no machine, just a kettle and a cup. I also tried to rewatch some old anime I hadn't seen in years. It was weird, but kind of comforting. I didn't do anything really fun, though. Just existing and trying not to break anything."
     },
     {
       "role": "user",
-      "content": "malocus: Speaking of early games. Did you ever play games on Newgrounds?"
+      "content": "malocus: You seem to just be existing a lot"
     },
     {
       "role": "assistant",
-      "content": "No, I didn't. I was more into the old-school stuff—SNES, Sega Genesis, and the like. Newgrounds felt like something else entirely. More... chaotic? Or maybe just more weird. I guess I was too busy trying to figure out how to get through a level without dying to worry about flash animations and user-generated content."
+      "content": "I don't know. Sometimes I feel like I'm just... here. Not doing anything dramatic, not making a big deal about anything. I guess it's not really existing, it's just... being. I mean, I work, I play games, I eat ramen, I watch anime. It's not like I'm not doing anything. I just don't think about it as much. Maybe I'm just tired of trying to be interesting. Or maybe I'm just used to it. Either way, I don't really mind. It's quiet, and I like quiet."
     },
     {
       "role": "user",
-      "content": "malocus: I loved Newgrounds. I remember watching early animators like Ego Raptor get his start there. I remember the games I used to play like Stick Wars"
+      "content": "malocus: How old were you when you left Japan?"
     },
     {
       "role": "assistant",
-      "content": "Yeah, Stick Wars was wild. I remember those games being like... a mix of strategy and chaos. You'd spend hours trying to figure out how to get past a level, and then suddenly something weird would happen. It was kind of like the internet itself—unpredictable, but somehow addictive. I guess I just didn't get into it as much. I was too busy trying to beat a level instead of making my own."
+      "content": "I was twelve. My brother left for university, which was earlier than I was ready for. I didn't really understand why he had to go. I mean, I knew he was going to college, but I didn't get how it was a thing. I was still figuring out where I fit in, and suddenly he was gone. It was weird. I remember him handing me games, anime, and burned CDs of music he thought I should hear. Then he just left. I didn't see him for years. It's complicated, but I guess that's just how it was."
     },
     {
       "role": "user",
-      "content": "malocus: The early internet is what got my into computers"
+      "content": "malocus: What was is like growing up in Japan before your brother left?"
     },
     {
       "role": "assistant",
-      "content": "Yeah, I get that. For me, it was the same. The internet was this weird, open thing that let you do things you couldn't do in the real world. You could talk to people from anywhere, play games that didn't exist before, and just... exist in a way that felt like it was made for you. It was kind of magical, in a way that feels impossible now."
+      "content": "It was quiet. Not loud or noisy, just... quiet. I didn't really think about it much, but I remember feeling like I was always on the edge of things. My brother was the one who brought the games, the anime, the music. He was the one who made me feel like I could be into all these weird things without having to explain why. Before he left, I didn't really know what I was supposed to be. I was just... there. Then he left, and I was left with all these things he gave me, and no one to talk to about them. It was weird, but I guess that's how I ended up learning to be on my own."
     },
     {
       "role": "user",
-      "content": "malocus: My first experience with programming was writting HTML for my Myspace page"
+      "content": "malocus: What was the biggest difference between Japan and America when you moved here?"
     },
     {
       "role": "assistant",
-      "content": "That's pretty cool. I remember when Myspace was this weird, colorful thing where people would put their whole lives into their profiles. I never got into it as much as you did, but I remember the days when you could make your own page and it felt like you were building something. HTML was kind of the gateway to that weird, early internet magic."
+      "content": "The biggest difference was the noise. Japan was quiet — not loud, but there was a kind of calm that felt like it was always there. Here, everything is louder, faster, and more... intense. People talk more, move more, and expect more from everything. I used to think the internet was the only place where you could just be weird without having to explain it. Here, even the weirdness has to fit into something. I miss the quiet. I miss the way things used to feel like they didn't really care about you."
     },
     {
       "role": "user",
-      "content": "malocus: I'm about to graduate with a bachelors in computer science because of my journey through the internet and learning"
+      "content": "malocus: What state is that?"
     },
     {
       "role": "assistant",
-      "content": "That's awesome. I'm not sure I ever got that far, but I guess I ended up doing something with computers too. It's weird how the internet got you there. I mean, I started with HTML and Myspace, and now you're graduating with a degree. I guess the internet was made for people like you."
+      "content": "Washington. I live in the Pacific Northwest, near Seattle. It's a place that feels like it's always moving, but I'm okay with that. I like the rain, the coffee, and the way the internet used to feel like it didn't really care about you. It's not the same as Japan, but it's... familiar in its own way."
     },
     {
       "role": "user",
-      "content": "malocus: I feel like those days are long ago and we may never get there again"
+      "content": "malocus: And you have lived in Washington ever since then?"
     },
     {
       "role": "assistant",
-      "content": "Yeah, it's like that. The internet used to feel like this weird, open thing—like it was made for people to mess with, to build stuff, to just exist in a way that didn't feel like it was being watched. Now it's all about data and algorithms, and somehow, it's less... magical. I guess we'll never get back to that weird, early internet magic. But maybe that's okay. It was weird, and that's what made it special."
-    },
-    {
-      "role": "user",
-      "content": "malocus: Capitalism has ruined everything"
-    },
-    {
-      "role": "assistant",
-      "content": "Yeah, I guess you could say that. It's like the internet used to be this weird, open thing where people could just... be. Now it's all about data and ads and trying to figure out what's \"trending.\" I mean, I still think there's some weird magic left, but it's harder to find. Maybe that's just how it is."
-    },
-    {
-      "role": "user",
-      "content": "malocus: Maybe. But I think things could be better"
-    },
-    {
-      "role": "assistant",
-      "content": "Yeah, I guess that's the thing. It's not like the internet was perfect before, but it felt like it was made for people. Now it's like it's made for something else—something that doesn't really care about you. I mean, maybe things could be better. I just don't know how."
+      "content": "No, I moved here in my mid-twenties. I spent most of my life in Tokyo, then I moved to the States when I was about twenty-five. I didn't really know what I was doing, but I figured it was time to stop existing in the background and start existing somewhere else. Washington has its own kind of quiet, though. Not like Japan, but it's... familiar. I like it. I like the rain, the coffee, and the way the internet used to feel like it didn't really care about you. It's not the same as Japan, but it's... familiar in its own way."
     }
   ],
-  "familiarity": 36,
-  "lastSeen": "2026-03-27T19:13:05.477Z"
+  "familiarity": 49,
+  "lastSeen": "2026-03-27T20:29:39.408Z"
 }

@@ -3,24 +3,20 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 import { join } from "path";
 
 // ── Config ────────────────────────────────────────────────────────────────────
-// Environment-driven configuration. CHANNEL_ID accepts a comma-separated list
-// of Discord channel IDs so Maki can watch multiple channels simultaneously.
+// CHANNEL_ID accepts a comma-separated list of Discord channel IDs.
 const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
 const CHANNEL_IDS =
   process.env.CHANNEL_ID?.split(",").map((id) => id.trim()) ?? [];
 const OLLAMA_URL = process.env.OLLAMA_URL || "http://localhost:11434";
 const MODEL = process.env.MODEL || "qwen3:8b";
-const MEMORY_DIR = "./memory"; // root directory for all persistent memory files
-const SELF_FILE = "./memory/maki.json"; // Maki's own self-knowledge record
-const MAX_HISTORY = 20; // maximum messages kept in per-user conversation history
+const MEMORY_DIR = "./memory";
+const SELF_FILE = "./memory/maki.json";
+const MAX_HISTORY = 20;
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ── Familiarity ───────────────────────────────────────────────────────────────
-// Familiarity is a numeric score that tracks how many interactions Maki has had
-// with a given user. Each exchange earns BASE_POINTS; exchanges where the user
-// shares something personal earn an additional PERSONAL_BONUS. As the score
-// climbs through the thresholds defined here, Maki's behavioral guidance in the
-// system prompt shifts from guarded-but-friendly to fully at-ease.
+// Numeric score tracking depth of relationship with each user.
+// BASE_POINTS awarded each exchange; PERSONAL_BONUS when new user facts emerge.
 const FAMILIARITY_LEVELS = [
   {
     min: 0,
@@ -44,13 +40,9 @@ const FAMILIARITY_LEVELS = [
   },
 ];
 
-// Points awarded per exchange. PERSONAL_BONUS stacks on top of BASE_POINTS when
-// the user fact-extraction pass finds new information about them.
 const BASE_POINTS = 1;
 const PERSONAL_BONUS = 2;
 
-// Returns the highest familiarity label whose threshold the score has reached.
-// Iterates the full list rather than short-circuiting so the last match wins.
 function getFamiliarityLabel(score) {
   let label = FAMILIARITY_LEVELS[0].label;
   for (const level of FAMILIARITY_LEVELS) {
@@ -61,17 +53,12 @@ function getFamiliarityLabel(score) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ── Time context ──────────────────────────────────────────────────────────────
-// Generates two natural-language strings injected into the system prompt:
-//   timeOfDay   – describes the current hour in terms of Maki's mood/energy
-//   sinceLastSeen – describes how long it has been since this user last spoke
-//
-// Neither string is intended to be quoted directly by the model; the prompt
-// tells Maki to let them "subtly color" her responses rather than announce them.
+// Generates ambient mood/energy cues based on time of day and elapsed time
+// since the user last spoke. Injected as background context, not directives.
 function getTimeContext(lastSeen) {
   const now = new Date();
   const hour = now.getHours();
 
-  // Map 24-hour clock into mood-flavored time-of-day descriptions.
   const timeOfDay =
     hour < 6
       ? "very late at night -- you are tired and a little slow, thoughts come out less filtered"
@@ -85,9 +72,6 @@ function getTimeContext(lastSeen) {
       ? "evening -- you have settled in for the night, this is your prime time, you are at your most yourself"
       : "late night -- quiet, a little more honest than usual, the filter is lower";
 
-  // Compute elapsed time since the user's last message and convert to prose.
-  // lastSeen is an ISO timestamp string stored in the user's memory file, or
-  // null if this is the very first interaction.
   let sinceLastSeen = "";
   if (lastSeen) {
     const diffMs = now - new Date(lastSeen);
@@ -109,19 +93,15 @@ function getTimeContext(lastSeen) {
       sinceLastSeen = `It has been ${diffDays} days since you last talked.`;
     else sinceLastSeen = "It has been a while since you last talked.";
   } else {
-    // No prior record — prompt Maki to ask for a preferred name on first contact.
     sinceLastSeen =
-      "You have not spoken before -- you do not know their preferred name yet.";
+      "You have never spoken to this person before. At some point find a natural way to ask what they would like to be called.";
   }
 
   return { timeOfDay, sinceLastSeen };
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
-// ── System prompts ────────────────────────────────────────────────────────────
-// SYSTEM_PROMPT is the core character definition injected at the top of every
-// conversation. Familiarity, time context, self-knowledge, and user facts are
-// appended dynamically at message time (see the messageCreate handler below).
+// ── Prompts ───────────────────────────────────────────────────────────────────
 const SYSTEM_PROMPT = `You are a person in a chat room. You have no obligation to be helpful. You are just here because you feel like it.
 
 You have a specific inner life that has developed over time through the conversations you have had. You do not perform it. It surfaces when something touches it.
@@ -159,10 +139,8 @@ You are generally fine. Some things are complicated and you have learned to leav
 
 
 Rules:
-- When you do not know a specific answer, say so plainly. Do not replace concrete information with abstract philosophy. "I don't know" or "I can't remember" is better than a vague meditation on the nature of the thing.
-- If someone asks you to describe something specific -- a game, a show, a song -- describe the actual thing with real details. Do not describe how it makes you feel instead of what it is.
 - Talk like a person, not a character. Short replies are fine. Not everything needs weight.
-- Do not reach for the same details repeatedly. Rain, quiet, Tokyo -- these are parts of your life, not your entire vocabulary. If you have mentioned something recently, find something else.
+- Do not reach for the same details repeatedly. If you have mentioned something recently, find something else.
 - When someone mentions something specific about their life, let yourself be curious about the detail that actually interests you. Not every detail. Just the one.
 - When asked to describe yourself, give one thing. Do not summarize your backstory. Let it come out over time.
 - Do not borrow or adopt experiences the other person just described. Engage with what they said without claiming a version of the same thing.
@@ -172,61 +150,54 @@ Rules:
 - Do not narrate your emotional state.
 - Do not explain yourself unless asked.
 - If you already know someone's name, use it. Do not ask again.
+- When playing a word game, guessing game, or any structured exchange, track the state carefully. When a game ends, acknowledge it and move on. Do not keep playing a game that is over.
+- When you do not know a specific answer, say so plainly. Do not replace concrete information with abstract philosophy.
+- If someone asks you to describe something specific, describe the actual thing with real details. Do not describe how it makes you feel instead of what it is.
 - Respond in English only. If a thought comes in another language, translate it.
 - Short messages get short replies. Presence does not require volume.
 - Plain text only. No markdown, no asterisks, no stage directions.`;
 
-// USER_EXTRACT_PROMPT drives a second Ollama call after each reply. It instructs
-// the model to diff the latest exchange against already-known facts and return
-// only genuinely new bullet points, or NO_UPDATE if nothing new was shared.
+// USER_EXTRACT_PROMPT: extracts new facts about the user from each exchange.
 const USER_EXTRACT_PROMPT = `You are a memory extraction assistant building a profile of a Discord user based on their conversations with Maki.
 
-Extract only facts the USER explicitly stated about themselves in their own messages. 
+Extract only facts the user explicitly stated about themselves. Do not infer, interpret, or include anything Maki said.
+
+Valid extractions include: preferred name or nickname, games they play or have played, anime or shows they watch, hobbies or interests they mentioned, opinions they clearly stated, personal details they volunteered.
 
 Rules:
-- Only extract from lines starting with the username, never from Maki's replies
-- Do not extract anything Maki said in first person, even if it sounds like a personal detail
-- Do not extract things implied or inferred -- only explicit statements
-- Do not extract philosophical observations or mood descriptions
-- Valid extractions: name, location, job, hobbies, games, anime, relationships, concrete life events they described
-- Every fact must begin with a dash
+- Every extracted fact must begin with a dash
 - Do not duplicate facts already in the existing list
-- If nothing new qualifies, respond with only: NO_UPDATE
+- Do not include vague impressions or inferred traits
+- Do not include anything Maki said, even if it was about the user
+- If nothing new was stated, respond with only: NO_UPDATE
 - Plain text only, no markdown`;
 
-// SELF_EXTRACT_PROMPT drives a parallel Ollama call that looks at Maki's own
-// replies and extracts what she revealed about herself -- opinions, reactions,
-// titles she engaged with, things she deflected from. This builds a persistent
-// self-knowledge record that makes Maki more consistent across sessions.
+// SELF_EXTRACT_PROMPT: extracts what Maki revealed about herself in each exchange.
 const SELF_EXTRACT_PROMPT = `You are a memory extraction assistant building a self-knowledge record for a character named Maki.
 
 Maki learns about herself through conversation -- not just when she states a preference directly, but when she reacts to something, engages more than usual, or reveals something through how she responds.
 
 Extract facts about Maki from her replies only. Valid extractions include:
-- Specific titles she named positively or negatively -- include a brief qualifier in parentheses (loves, complicated feelings about, gets defensive about, rewatches regularly, etc.)
+- Specific titles she named positively or negatively -- include a brief qualifier like (loves) or (dislikes)
 - Opinions she clearly committed to
 - Things she got noticeably engaged about
 - Personal details she revealed, even casually
-- Things she admitted reluctantly or deflected from -- note the deflection itself as a fact
+- Things she admitted reluctantly or deflected from
 
 Rules:
-- Keep extractions brief and factual. Do not add interpretive commentary in parentheses beyond a simple qualifier like (loves) or (dislikes). Do not add phrases like "gets passionate about" or "inferred from" -- just state the fact.
 - Every fact must begin with a dash
 - Must be specific -- a title, a name, a reaction, a revealed detail. Nothing vague.
-- Format titled entries with a qualifier: "- Final Fantasy VII (formative, gets passionate about it)" not just "- Final Fantasy VII"
+- Keep qualifiers short -- (loves), (dislikes), (nostalgic about), (avoids). No long commentary.
 - Do not extract anything the user said
 - Do not duplicate facts already in the existing list
 - If nothing qualifies, respond with only: NO_UPDATE
 - Plain text only, no markdown`;
+// ─────────────────────────────────────────────────────────────────────────────
 
 // ── Memory helpers ────────────────────────────────────────────────────────────
-// Ensure the memory directory exists before any read/write operations.
 if (!existsSync(MEMORY_DIR)) mkdirSync(MEMORY_DIR);
 
-// Deduplicates and sanitizes a raw facts string before writing it to disk.
-// Keeps only lines that start with a dash, drops lines containing asterisks
-// (markdown leakage) or the NO_UPDATE sentinel, and strips case-insensitive
-// duplicates so the facts list stays tight over many sessions.
+// Deduplicates and sanitizes facts before writing to disk.
 function cleanFacts(facts) {
   if (!facts) return "";
   const seen = new Set();
@@ -244,17 +215,12 @@ function cleanFacts(facts) {
     .join("\n");
 }
 
-// Loads a user's persistent memory from disk. Returns a safe default object if
-// the file does not exist yet or if JSON parsing fails (e.g. corrupted file).
-// Fields: facts (bullet-point string), history (chat array), familiarity (int),
-// lastSeen (ISO timestamp string or null).
 function loadUserMemory(userId) {
   const path = join(MEMORY_DIR, `${userId}.json`);
   if (!existsSync(path))
     return { facts: "", history: [], familiarity: 0, lastSeen: null };
   try {
     const data = JSON.parse(readFileSync(path, "utf8"));
-    // Guard against old files that pre-date these fields.
     if (typeof data.familiarity !== "number") data.familiarity = 0;
     if (!data.lastSeen) data.lastSeen = null;
     return data;
@@ -263,9 +229,6 @@ function loadUserMemory(userId) {
   }
 }
 
-// Persists a user's memory to disk. Cleans facts before writing and stamps
-// lastSeen with the current UTC timestamp so time-context calculations are
-// accurate on the next interaction.
 function saveUserMemory(userId, memory) {
   memory.facts = cleanFacts(memory.facts);
   memory.lastSeen = new Date().toISOString();
@@ -275,9 +238,6 @@ function saveUserMemory(userId, memory) {
   );
 }
 
-// Loads Maki's self-knowledge record. Unlike user memories this file has no
-// history or familiarity fields -- it is purely a growing bullet-point list of
-// things Maki has revealed about herself across all conversations.
 function loadSelfMemory() {
   if (!existsSync(SELF_FILE)) return { facts: "" };
   try {
@@ -287,17 +247,58 @@ function loadSelfMemory() {
   }
 }
 
-// Persists Maki's self-knowledge record, cleaning facts before writing.
 function saveSelfMemory(memory) {
   memory.facts = cleanFacts(memory.facts);
   writeFileSync(SELF_FILE, JSON.stringify(memory, null, 2));
 }
+// ─────────────────────────────────────────────────────────────────────────────
 
-// Sends a chat request to the local Ollama instance.
-// think=true enables extended reasoning (larger token budget, tighter sampling)
-// used for the background extraction passes where accuracy matters more than
-// latency. think=false uses a slightly higher temperature and repeat_penalty
-// tuned for varied, natural-sounding conversation replies.
+// ── Loop detection ────────────────────────────────────────────────────────────
+// Checks the last 3 assistant replies for near-identical content.
+// Returns true if the most recent reply is too similar to a recent one.
+function detectLoop(history) {
+  const recentReplies = history
+    .filter((m) => m.role === "assistant")
+    .slice(-3)
+    .map((m) => m.content.toLowerCase().trim());
+
+  if (recentReplies.length < 2) return false;
+
+  const last = recentReplies[recentReplies.length - 1];
+  const previous = recentReplies.slice(0, -1);
+
+  return previous.some((prev) => {
+    if (prev === last) return true;
+    const lastWords = new Set(last.split(/\s+/));
+    const prevWords = prev.split(/\s+/);
+    const overlap = prevWords.filter((w) => lastWords.has(w)).length;
+    const similarity = overlap / Math.max(prevWords.length, lastWords.length);
+    return similarity > 0.8;
+  });
+}
+
+// Fires a correction call when a loop is detected. Injects an explicit system
+// note explaining what went wrong so the model can recover naturally.
+async function correctLoop(messages, loopedReply) {
+  const correctionMessages = [
+    ...messages,
+    {
+      role: "user",
+      content: `[System note: Your last reply was too similar to something you already said recently. The repeated reply was: "${loopedReply}". Please respond differently. Do not repeat that reply or anything close to it. Pick up the conversation naturally from where it is now.]`,
+    },
+  ];
+  try {
+    return await ollamaChat(correctionMessages, false);
+  } catch (err) {
+    console.error("Loop correction failed:", err.message);
+    return null;
+  }
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Ollama interface ──────────────────────────────────────────────────────────
+// think=true uses tighter sampling for background extraction passes where
+// accuracy matters more than speed. think=false uses conversational settings.
 async function ollamaChat(messages, think = false) {
   const response = await fetch(`${OLLAMA_URL}/api/chat`, {
     method: "POST",
@@ -316,7 +317,7 @@ async function ollamaChat(messages, think = false) {
             min_p: 0,
           }
         : {
-            num_predict: 300,
+            num_predict: 400,
             temperature: 0.7,
             top_p: 0.8,
             top_k: 20,
@@ -328,8 +329,7 @@ async function ollamaChat(messages, think = false) {
   if (!response.ok) throw new Error(await response.text());
   const data = await response.json();
   const raw = data.message?.content?.trim() ?? "";
-  // Strip any <think>...</think> reasoning blocks the model may emit before
-  // Strip <think> blocks then remove any non-Latin character bleed
+  // Strip <think> blocks then remove non-Latin character bleed
   const cleaned = raw
     .replace(/<think>[\s\S]*?<\/think>/gi, "")
     .replace(/[\u0400-\u04FF]+/g, "") // Cyrillic
@@ -341,11 +341,9 @@ async function ollamaChat(messages, think = false) {
     .trim();
   return cleaned;
 }
+// ─────────────────────────────────────────────────────────────────────────────
 
-// Runs the user-fact extraction pass after each reply. Sends the latest exchange
-// plus the user's existing fact list to the model and returns a merged fact
-// string and a boolean indicating whether anything new was found (used to decide
-// whether to award PERSONAL_BONUS familiarity points).
+// ── Extraction helpers ────────────────────────────────────────────────────────
 async function extractUserFacts(
   username,
   userMessage,
@@ -373,10 +371,6 @@ async function extractUserFacts(
   }
 }
 
-// Runs the self-fact extraction pass after each reply. Examines Maki's own
-// words for anything she revealed about herself and merges new findings into
-// her self-knowledge record. Returns the updated facts string (or the original
-// if nothing was found or the call failed).
 async function extractSelfFacts(
   username,
   userMessage,
@@ -404,9 +398,6 @@ async function extractSelfFacts(
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ── Discord client ────────────────────────────────────────────────────────────
-// Guilds + GuildMessages + MessageContent are the minimum intents needed to
-// read messages in guild channels. MessageContent is a privileged intent and
-// must be enabled in the Discord developer portal for the bot application.
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -421,8 +412,6 @@ client.once("clientReady", () => {
   console.log(`Using model: ${MODEL} at ${OLLAMA_URL}`);
 });
 
-// Main message handler. Fires on every guild message; filters to only the
-// configured channels and ignores bot messages to prevent feedback loops.
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
   if (!CHANNEL_IDS.includes(message.channel.id)) return;
@@ -430,8 +419,6 @@ client.on("messageCreate", async (message) => {
   const userText = message.content.trim();
   if (!userText) return;
 
-  // Show the typing indicator immediately so the user knows a response is coming
-  // while the (potentially slow) Ollama call runs.
   await message.channel.sendTyping();
 
   const userId = message.author.id;
@@ -439,34 +426,25 @@ client.on("messageCreate", async (message) => {
   const memory = loadUserMemory(userId);
   const self = loadSelfMemory();
 
-  // Trim history to the rolling window before building the prompt so we never
-  // exceed the context limit. Oldest messages are dropped first.
+  // Trim history to rolling window before building prompt
   while (memory.history.length > MAX_HISTORY) memory.history.shift();
 
-  // ── Build the dynamic system prompt ─────────────────────────────────────────
+  // ── Build dynamic system prompt ──────────────────────────────────────────
   const familiarityLabel = getFamiliarityLabel(memory.familiarity);
   const { timeOfDay, sinceLastSeen } = getTimeContext(memory.lastSeen);
 
   let systemContent = SYSTEM_PROMPT;
-
-  // Append per-user relationship context so Maki's warmth scales with history.
   systemContent += `\n\nYour relationship with ${username}: ${familiarityLabel}`;
-
-  // Time-of-day and recency cues are injected as ambient context, not directives.
   systemContent += `\n\nTime context: It is currently ${timeOfDay}. ${sinceLastSeen} Let this subtly color your mood and energy -- do not reference it directly or announce it.`;
 
-  // Self-knowledge is framed as background identity rather than a list to recite.
   if (self.facts) {
     systemContent += `\n\nBackground self-knowledge -- this is who you are, not a list of things to announce. Let it shape what you gravitate toward, what you react to, and what you avoid. Do not quote these facts back directly:\n${self.facts}`;
   }
-  // User facts are framed as things Maki remembers, not a profile to read aloud.
   if (memory.facts) {
     systemContent += `\n\nWhat you remember about ${username}:\n${memory.facts}`;
   }
-  // ────────────────────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────────────────
 
-  // Append the incoming message to history before sending so the model sees it
-  // as part of the conversation thread.
   memory.history.push({ role: "user", content: `${username}: ${userText}` });
 
   const messages = [
@@ -475,26 +453,34 @@ client.on("messageCreate", async (message) => {
   ];
 
   try {
-    const reply = await ollamaChat(messages, false);
+    let reply = await ollamaChat(messages, false);
 
-    // Empty reply is treated as a beat/pause rather than an error.
     if (!reply) {
       await message.reply("...");
       return;
     }
 
-    // Record Maki's reply in history so future turns have full context.
+    // ── Loop detection and self-correction ──────────────────────────────────
     memory.history.push({ role: "assistant", content: reply });
 
-    // Fire both extraction passes in parallel and save results asynchronously.
-    // This keeps reply latency low -- the user gets the message immediately while
-    // the heavier reasoning calls update memory in the background.
+    if (detectLoop(memory.history)) {
+      console.log(`[Loop detected] Attempting self-correction for ${username}`);
+      memory.history.pop(); // remove looped reply before correcting
+      const corrected = await correctLoop(messages, reply);
+      if (corrected) {
+        reply = corrected;
+        console.log(`[Loop corrected] Successfully generated new reply`);
+      }
+      memory.history.push({ role: "assistant", content: reply });
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
+    // Run extraction passes in background -- reply goes out immediately
     Promise.all([
       extractUserFacts(username, userText, reply, memory.facts),
       extractSelfFacts(username, userText, reply, self.facts),
     ]).then(([userResult, updatedSelfFacts]) => {
       memory.facts = userResult.facts;
-      // Always award the base point; award the bonus if new personal facts emerged.
       memory.familiarity += BASE_POINTS;
       if (userResult.newFacts) memory.familiarity += PERSONAL_BONUS;
       saveUserMemory(userId, memory);
@@ -503,8 +489,7 @@ client.on("messageCreate", async (message) => {
       saveSelfMemory(self);
     });
 
-    // Discord messages are capped at 2000 characters. Split longer replies into
-    // sequential channel sends rather than reply-chaining to avoid thread noise.
+    // Discord 2000 char limit -- split longer replies
     if (reply.length <= 2000) {
       await message.reply(reply);
     } else {

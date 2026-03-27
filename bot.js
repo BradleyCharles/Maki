@@ -88,7 +88,8 @@ function getTimeContext(lastSeen) {
       sinceLastSeen = `It has been ${diffDays} days since you last talked.`;
     else sinceLastSeen = "It has been a while since you last talked.";
   } else {
-    sinceLastSeen = "You have never spoken to this person before.";
+    sinceLastSeen =
+      "You have never spoken to this person before. Ask if they have a preferred name or nickname you can use for them.";
   }
 
   return { timeOfDay, sinceLastSeen };

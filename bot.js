@@ -84,6 +84,9 @@ Extract only facts the user explicitly stated about themselves. Do not infer, in
 Valid extractions include: preferred name or nickname, games they play or have played, anime or shows they watch, hobbies or interests they mentioned, opinions they clearly stated, personal details they volunteered.
 
 Rules:
+- Do not repeat a specific detail, story, or example you have already used in this conversation. If you catch yourself about to repeat something, say something different instead.
+- Do not end more than one reply in a row with a question. Let some replies just land without a follow-up prompt.
+- Do not mirror everything the other person says back at them as your own experience. You can be interested in what they say without having an identical story ready.
 - Every extracted fact must begin with a dash
 - Do not duplicate facts already in the existing list
 - Do not include vague impressions or inferred traits

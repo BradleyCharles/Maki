@@ -76,14 +76,14 @@ function getTimeContext(lastSeen) {
     hour < 6
       ? "very late at night -- you are tired and a little slow, thoughts come out less filtered"
       : hour < 11
-      ? "morning -- you are not fully awake yet, a little groggy and terse"
-      : hour < 14
-      ? "midday -- you are alert and present"
-      : hour < 18
-      ? "afternoon -- relaxed, in the middle of your day"
-      : hour < 22
-      ? "evening -- you have settled in for the night, this is your prime time, you are at your most yourself"
-      : "late night -- quiet, a little more honest than usual, the filter is lower";
+        ? "morning -- you are not fully awake yet, a little groggy and terse"
+        : hour < 14
+          ? "midday -- you are alert and present"
+          : hour < 18
+            ? "afternoon -- relaxed, in the middle of your day"
+            : hour < 22
+              ? "evening -- you have settled in for the night, this is your prime time, you are at your most yourself"
+              : "late night -- quiet, a little more honest than usual, the filter is lower";
 
   // Compute elapsed time since the user's last message and convert to prose.
   // lastSeen is an ISO timestamp string stored in the user's memory file, or
@@ -179,16 +179,17 @@ Rules:
 // only genuinely new bullet points, or NO_UPDATE if nothing new was shared.
 const USER_EXTRACT_PROMPT = `You are a memory extraction assistant building a profile of a Discord user based on their conversations with Maki.
 
-Extract only facts the user explicitly stated about themselves. Do not infer, interpret, or include anything Maki said.
-
-Valid extractions include: preferred name or nickname, games they play or have played, anime or shows they watch, hobbies or interests they mentioned, opinions they clearly stated, personal details they volunteered.
+Extract only facts the USER explicitly stated about themselves in their own messages. 
 
 Rules:
-- Every extracted fact must begin with a dash
+- Only extract from lines starting with the username, never from Maki's replies
+- Do not extract anything Maki said in first person, even if it sounds like a personal detail
+- Do not extract things implied or inferred -- only explicit statements
+- Do not extract philosophical observations or mood descriptions
+- Valid extractions: name, location, job, hobbies, games, anime, relationships, concrete life events they described
+- Every fact must begin with a dash
 - Do not duplicate facts already in the existing list
-- Do not include vague impressions or inferred traits
-- Do not include anything Maki said, even if it was about the user
-- If nothing new was stated, respond with only: NO_UPDATE
+- If nothing new qualifies, respond with only: NO_UPDATE
 - Plain text only, no markdown`;
 
 // SELF_EXTRACT_PROMPT drives a parallel Ollama call that looks at Maki's own
@@ -267,7 +268,7 @@ function saveUserMemory(userId, memory) {
   memory.lastSeen = new Date().toISOString();
   writeFileSync(
     join(MEMORY_DIR, `${userId}.json`),
-    JSON.stringify(memory, null, 2)
+    JSON.stringify(memory, null, 2),
   );
 }
 
@@ -337,7 +338,7 @@ async function extractUserFacts(
   username,
   userMessage,
   botReply,
-  existingFacts
+  existingFacts,
 ) {
   const messages = [
     { role: "system", content: USER_EXTRACT_PROMPT },
@@ -368,7 +369,7 @@ async function extractSelfFacts(
   username,
   userMessage,
   botReply,
-  existingFacts
+  existingFacts,
 ) {
   const messages = [
     { role: "system", content: SELF_EXTRACT_PROMPT },

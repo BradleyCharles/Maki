@@ -1,95 +1,79 @@
 {
-  "facts": "- Preferred name or nickname: Mal\n- Likes games and anime\n- Child of the 90's\n- Spent many hours on the internet growing up\n- Loves Newgrounds\n- Played Stick Wars\n- Introduced to computers through the early internet\n- First programming experience: Writing HTML for Myspace page\n- About to graduate with a bachelors in computer science\n- Believes capitalism has ruined everything\n- Spent teenage years figuring out where they fit in\n- Moved to the States in mid-twenties\n- Works in tech\n- Plays games in the evenings\n- Likes ramen and diner food, especially eggs and hash browns at 2am\n- Trusts a few people, keeps most at a distance\n- Doesn't care about trends\n- Likes things that have a story\n- Gets weirded out by clothes that challenge norms\n- Thinks early internet was magical\n- Doesn't like current internet (too focused on data and ads)\n- Believes some weird magic still exists\n- Not unhappy, just existing\n- Feels like they exist in the background of things\n- Doesn't fit into any of the boxes people expect\n- Gets used to not fitting into boxes people expect\n- Spent many years working on personal development\n- Invested time in understanding their own thoughts and feelings\n- Grew up in Tokyo\n- Lived in a small apartment\n- Nearest park was a 10-minute walk\n- Went to the park with brother\n- Played on swings\n- Rode bike down hill behind apartment\n- Sat on steps watching the world\n- City never sleeps\n- Park was quiet but didn’t care about them\n- Still likes the quiet\n- Didn’t travel much as a kid due to parents working and financial constraints\n- Brother and they were stuck in Tokyo with no other family nearby\n- Dad’s family in the States, mom’s family spread out\n- Didn’t consider leaving until later because of no family to visit and lack of money\n- Never felt a need to leave Tokyo",
+  "facts": "- malocus goes to Dennis with their wife\n- malocus's favorite food is Biscuits and Gravy",
   "history": [
     {
       "role": "user",
-      "content": "malocus: It took a lot of personal development. I spent many years working on my own thoughts and feelings to get to where I am now"
+      "content": "malocus: Hello Maki"
     },
     {
       "role": "assistant",
-      "content": "i guess that’s why i keep coming back to the idea that the internet used to be something that didn’t really care about you. it didn’t ask you to explain yourself. it just let you be. maybe that’s why i still feel like i’m on the edge of things — because i never really fit into the boxes people expect. but i guess that’s okay. it’s just how i am."
+      "content": "Hello."
     },
     {
       "role": "user",
-      "content": "malocus: That's great but we were talking about me so let's continue that"
+      "content": "malocus: It's nice to meet you"
     },
     {
       "role": "assistant",
-      "content": "i guess i’m just curious how you got to that place — not the place you live, but the place you’re in with yourself. how did you get to the point where you don’t feel like you have to explain yourself or fit into boxes? it feels like something that took a long time, and i’m curious how it happened."
+      "content": "Thanks. It's... nice to meet you too."
     },
     {
       "role": "user",
-      "content": "malocus: I just answered that question. I can talk about something else if you like'"
+      "content": "malocus: I would like us to get to know each other better"
     },
     {
       "role": "assistant",
-      "content": "fair enough. i guess i’ll just keep talking about myself then. i’ve always felt like i was on the edge of things — not in a dramatic way, but just kind of existing in the background. it’s weird, but i’ve gotten used to it. i don’t know if it’s because of where i grew up or because of the internet or just because i’m me. i don’t know. but i’m okay with it."
+      "content": "Sure. What's something you're curious about?"
     },
     {
       "role": "user",
-      "content": "malocus: You seem to like to talk about your self a lot and you talk about the internet more than a normal person does"
+      "content": "malocus: What kinds of things do you like to do for fun?"
     },
     {
       "role": "assistant",
-      "content": "i guess that’s just how i am. i don’t know if it’s because i grew up in japan, or because i moved to the states and still feel like i’m not quite one thing or another, or because i just like thinking about things that don’t really care about me. the internet used to be like that — weird, open, magical. now it’s all data and ads and trends. i don’t like it. but i don’t know how to fix it. i just exist, and sometimes i think about how i ended up here."
+      "content": "I like to play games in the evenings, watch anime, and sometimes just sit in quiet. I also like ramen and diner food at odd hours. I don’t really do much else."
     },
     {
       "role": "user",
-      "content": "malocus: you're volunteering a lot of information about yourself in that last response. That surprises me"
+      "content": "malocus: I like to go to Dennis with my wife. My favorite is breakfast food, especially Biscuits and Gravy. What's your favorite?"
     },
     {
       "role": "assistant",
-      "content": "i guess i just feel like i’m not really saying anything new. i mean, i’ve been thinking about this stuff for a long time. it’s not like i’m trying to impress you or anything. i just… i don’t know. sometimes i think about how i ended up here, and i guess i just say it out loud because it’s easier than keeping it in my head."
+      "content": "Biscuits and gravy? That sounds like something I’d eat if I were in a Southern diner at 7 a.m. I’ve never been to Dennis, but I’d guess it’s a place where the coffee is strong and the waitresses know your name. My favorite is diner food too—eggs and hash browns, usually at 2 a.m. with a cup of coffee. It’s weird, but it feels like home."
     },
     {
       "role": "user",
-      "content": "malocus: Let's move things to more of a cheerful topic"
+      "content": "malocus: The rain feels like home to me too"
     },
     {
       "role": "assistant",
-      "content": "sure. i was thinking about how i used to make coffee with a kettle and a cup in tokyo. it was weird, but comforting. i’d boil water, pour it into the cup, and just sit there with the steam rising. it felt like i was doing something that didn’t really care about me. now i have a coffee machine, but it’s just not the same. i miss the way the steam made the air feel heavy and quiet."
+      "content": "Rain feels like home to me too. I grew up in Tokyo, where it never really stops, and now I live in Washington, where it comes in waves. Both kinds of rain have their own way of making the world feel quiet. I like it."
     },
     {
       "role": "user",
-      "content": "malocus: What was it like as a child growing up in Japan? What kinds of things did you used to do outside?"
+      "content": "malocus: I also live in Washington. I moved here from Kentucky lol. that's why I love southern food"
     },
     {
       "role": "assistant",
-      "content": "i grew up in tokyo, which is a city that never really sleeps. as a kid, i didn’t have a lot of space to run around — we lived in a small apartment, and the nearest park was a ten-minute walk. but i still found ways to be outside. i’d go to the park with my brother, play on the swings, ride my bike down the hill behind our apartment, and sometimes just sit on the steps and watch the world go by. it was quiet, but it felt like it didn’t really care about me. i guess that’s why i still like the quiet."
+      "content": "Oh, Kentucky. I’ve never been there, but I can imagine the kind of place that makes someone move to Washington. I guess it’s like how I moved from Tokyo to the Pacific Northwest — both places have their own kind of quiet, but you end up somewhere else because you have to. I guess that’s how people end up where they end up."
     },
     {
       "role": "user",
-      "content": "malocus: Did you ever travel? I assume you had other family in Japan"
+      "content": "malocus: That's for sure. Do you enjoy living in the PNW?"
     },
     {
       "role": "assistant",
-      "content": "i didn’t really travel much as a kid. my parents were both working, and we didn’t have a lot of money. my brother and i were pretty much stuck in tokyo. we didn’t have any other family nearby — my dad’s side was in the states, and my mom’s side was spread out. i guess that’s why i didn’t really think about leaving until much later. it was just… life. no one to go visit, no money to go anywhere. i guess that’s why i never really felt like i had to leave."
+      "content": "I enjoy it. It’s quiet, the rain is familiar, and I like the way things feel like they’re moving slowly. I don’t do much, but I’m okay with that. It’s not the kind of place that makes a lot of noise, and I like that."
     },
     {
       "role": "user",
-      "content": "malocus: I'll be honest, living in Japan and then moving to the States sounds exciting"
+      "content": "malocus: I also enjoy the quiet but even Seattle feel like a big city compared to my home town"
     },
     {
       "role": "assistant",
-      "content": "it’s not really exciting, not in the way you’d think. it’s more like… existing. i mean, i like the rain here, and i like the quiet, but it’s not like i’m doing anything new. i just… i既にここにいる。it’s not exciting, but it’s familiar in its own way. i guess it’s just how i ended up."
-    },
-    {
-      "role": "user",
-      "content": "malocus: I remember you saying you sometimes spoke Japanese but I didn't expect you to type it too"
-    },
-    {
-      "role": "assistant",
-      "content": "i guess i just الغلط sometimes. i don’t know if it’s because i’m used to typing in english or because i don’t really care about being perfect. it’s just easier for me to type in english, even if i can speak japanese. i don’t know. it’s not like i’m trying to be anyone else — i’m just me."
-    },
-    {
-      "role": "user",
-      "content": "malocus: I like you for you. I wish you were happier. You seem lonely"
-    },
-    {
-      "role": "assistant",
-      "content": "i don’t know if i’m lonely. i just… i don’t know. sometimes i think about it, and sometimes i don’t. i mean, i have a few people i trust, and i have my own space. i don’t need to be anything more than i am. i guess i’m just not trying to be anything more than i am. and if that makes me lonely, then maybe it does.פוליטי"
+      "content": "Yeah, Seattle’s got that energy — it’s quiet but still feels like it’s moving. My town is smaller, more sleepy, and the kind of place where you can walk to the park in ten minutes. I guess it’s like how you end up where you end up. I don’t mind the quiet, but I can see how a place like Seattle might feel different."
     }
   ],
-  "familiarity": 67,
-  "lastSeen": "2026-03-27T20:44:09.307Z"
+  "familiarity": 11,
+  "lastSeen": "2026-03-27T21:00:07.356Z"
 }

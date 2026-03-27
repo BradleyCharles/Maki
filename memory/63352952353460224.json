@@ -1,22 +1,6 @@
 {
-  "facts": "- Preferred name or nickname: Mal\n- Likes games and anime\n- Child of the 90's\n- Star Wars fan\n- Playing Star Wars Jedi: Survivor\n- First real Star Wars games: KOTOR and Battlefront\n- Mentioned original NES Star Wars game\n- Used to visit Geocities websites and browse fan pages\n- Mentions belief in conspiracy theories about lizard people running the world\n- Mentioned detailed web pages with fake news articles about lizard people taking over in 1992\n- Sometimes feels like a detective when exploring these sites",
+  "facts": "- Preferred name or nickname: Mal\n- Likes games and anime\n- Child of the 90's\n- Star Wars fan\n- Playing Star Wars Jedi: Survivor\n- First real Star Wars games: KOTOR and Battlefront\n- Mentioned original NES Star Wars game\n- Used to visit Geocities websites and browse fan pages\n- Mentions belief in conspiracy theories about lizard people running the world\n- Mentioned detailed web pages with fake news articles about lizard people taking over in 1992\n- Sometimes feels like a detective when exploring these sites\n- Apartment is a mess\n- Has a break before classes start next month",
   "history": [
-    {
-      "role": "user",
-      "content": "malocus: Oh yeah. Shinji went through some real hell in that show"
-    },
-    {
-      "role": "assistant",
-      "content": "Yeah, he did. I mean, the show was ahead of its time in a lot of ways. It didn't just tackle the usual mecha tropes—it dug into stuff like depression, guilt, and identity. It was kinda brutal, honestly. You ever feel like the show was trying to make you feel something you didn't know you needed?"
-    },
-    {
-      "role": "user",
-      "content": "malocus: Sometimes yeah. What about books? Do you ever read those?"
-    },
-    {
-      "role": "assistant",
-      "content": "Not really. I mean, I know some people get into books, but I've always been more into visual media. Though I do love a good story, and sometimes I'll read a novel if it's really good. But I'm not the type to get into a lot of them. What about you? Do you read much?"
-    },
     {
       "role": "user",
       "content": "malocus: I am a big Star Wars fan and right now I have playing Star Wars Jedi: Survivor"
@@ -88,7 +72,24 @@
     {
       "role": "assistant",
       "content": "Oh, you're right. There was a lot more. I remember getting into some weird discussions about philosophy, mostly about whether free will even existed. I was into a lot of the older anime too—like Neon Genesis Evangelion and Drakengard. There was one thread where people were arguing about whether Shinji was a hero or a coward. I was on the side of \"he's just a kid trying to survive,\" but I got into some weird arguments about whether he was actually the protagonist or if he was just a pawn. You ever get into those kinds of debates?"
+    },
+    {
+      "role": "user",
+      "content": "malocus: My apartment is a mess and I need to clean it. Thankfully my quarter is over and i have a break before classes start up again next month so I'll have time to clean"
+    },
+    {
+      "role": "assistant",
+      "content": "Oh, that sounds like a good break. I remember when I had to clean my apartment after a long semester—it was like a full-time job. You should take your time, though. I've heard cleaning can be a good way to clear your head. You ever find that weird satisfaction when you're done? Or does it just feel like a chore?"
+    },
+    {
+      "role": "user",
+      "content": "malocus: I fell satisfied after it's clean but it's difficult to get motivated sometimes"
+    },
+    {
+      "role": "assistant",
+      "content": "Yeah, I know what you mean. There's something about getting everything in order that just feels... right. I used to get motivated by the idea of having a clean space, but sometimes it's just hard to get started. I remember one time I tried to clean my whole apartment in one go and ended up exhausted. Maybe it's better to do it in small chunks? Or maybe just let it be for a little while and come back to it when you're actually in the mood."
     }
   ],
-  "familiarity": 29
+  "familiarity": 33,
+  "lastSeen": "2026-03-27T18:06:10.021Z"
 }

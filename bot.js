@@ -91,14 +91,20 @@ Rules:
 - If nothing new was stated, respond with only: NO_UPDATE
 - Plain text only, no markdown`;
 
-const SELF_EXTRACT_PROMPT = `You are a memory extraction assistant building a record of opinions and preferences that Maki has explicitly committed to during conversations.
+const SELF_EXTRACT_PROMPT = `You are a memory extraction assistant building a self-knowledge record for a character named Maki.
 
-This record is used to keep Maki consistent across sessions. Only extract things Maki clearly stated as her own preference or opinion in her replies -- a specific game she named, a specific anime title she expressed a strong feeling about, a stance she committed to.
+Maki learns about herself through conversation -- not just when she states a preference directly, but when she reacts to something, engages more than usual, or reveals something through how she responds.
+
+Extract facts about Maki from her replies only. Valid extractions include:
+- Specific titles she named positively or negatively
+- Opinions she clearly committed to
+- Things she got noticeably engaged about
+- Personal details she revealed, even casually
+- Things she admitted reluctantly or deflected from -- note the deflection itself as a fact
 
 Rules:
-- Every extracted fact must begin with a dash
-- Must be specific -- a title, a name, a clearly stated position. Nothing vague like "prefers classics"
-- Do not extract tone, attitude, or implied preferences
+- Every fact must begin with a dash
+- Must be specific -- a title, a name, a reaction, a revealed detail. Nothing vague.
 - Do not extract anything the user said
 - Do not duplicate facts already in the existing list
 - If nothing qualifies, respond with only: NO_UPDATE
@@ -140,7 +146,7 @@ function saveUserMemory(userId, memory) {
   memory.facts = cleanFacts(memory.facts);
   writeFileSync(
     join(MEMORY_DIR, `${userId}.json`),
-    JSON.stringify(memory, null, 2),
+    JSON.stringify(memory, null, 2)
   );
 }
 
@@ -196,13 +202,15 @@ async function extractUserFacts(
   username,
   userMessage,
   botReply,
-  existingFacts,
+  existingFacts
 ) {
   const messages = [
     { role: "system", content: USER_EXTRACT_PROMPT },
     {
       role: "user",
-      content: `Existing facts about ${username}:\n${existingFacts || "none"}\n\nLatest exchange:\n${username}: ${userMessage}\nMaki: ${botReply}\n\nWhat new facts should be added?`,
+      content: `Existing facts about ${username}:\n${
+        existingFacts || "none"
+      }\n\nLatest exchange:\n${username}: ${userMessage}\nMaki: ${botReply}\n\nWhat new facts should be added?`,
     },
   ];
   try {
@@ -221,13 +229,15 @@ async function extractSelfFacts(
   username,
   userMessage,
   botReply,
-  existingFacts,
+  existingFacts
 ) {
   const messages = [
     { role: "system", content: SELF_EXTRACT_PROMPT },
     {
       role: "user",
-      content: `What Maki already knows about herself:\n${existingFacts || "none"}\n\nLatest exchange:\n${username}: ${userMessage}\nMaki: ${botReply}\n\nWhat new concrete preferences did Maki explicitly state?`,
+      content: `What Maki already knows about herself:\n${
+        existingFacts || "none"
+      }\n\nLatest exchange:\n${username}: ${userMessage}\nMaki: ${botReply}\n\nWhat new concrete preferences did Maki explicitly state?`,
     },
   ];
   try {

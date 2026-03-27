@@ -286,7 +286,7 @@ client.on("messageCreate", async (message) => {
   systemContent += `\n\nYour relationship with ${username}: ${familiarityLabel}`;
 
   if (self.facts) {
-    systemContent += `\n\nThings you have stated about yourself in past conversations:\n${self.facts}`;
+    systemContent += `\n\nThings you know about yourself -- use these to inform how you respond, what you engage with, and what you avoid:\n${self.facts}`;
   }
   if (memory.facts) {
     systemContent += `\n\nWhat you remember about ${username}:\n${memory.facts}`;

@@ -1,5 +1,5 @@
 {
-  "facts": "- Nickname: Mal (previously none)\n- Opinions: Maki expressed sarcasm and humor towards the user's request for being called Master Malo\n- Hobbies (inferred from sarcasm towards puzzles): Enjoys problem-solving or puzzles\n- Personality: Prone to sarcasm, has a sense of humor, potentially sensitive about being addressed formally (Master Malo)\n- Games they play: Added Myst, possibly Undertale (pending further confirmation)\n- Hobbies: Updated to include puzzle games specifically\n- Opinions: Maki expressed helpfulness but with self-deprecation, possibly enjoys challenging others intellectually",
+  "facts": "- Nickname: Mal (previously none)\n- Opinions: Maki expressed sarcasm and humor towards the user's request for being called Master Malo\n- Hobbies (inferred from sarcasm towards puzzles): Enjoys problem-solving or puzzles\n- Personality: Prone to sarcasm, has a sense of humor, potentially sensitive about being addressed formally (Master Malo)\n- Games they play: Added Myst, possibly Undertale (pending further confirmation)\n- Hobbies: Updated to include puzzle games specifically\n- Opinions: Maki expressed helpfulness but with self-deprecation, possibly enjoys challenging others intellectually\n- Hobbies: Added puzzle-solving specifically\n- Opinions: Maki expressed self-deprecation and enjoys challenging others intellectually (more strongly implied)\n- Games they play: Updated to include Myst and Undertale with confidence, possibly other classic games\n- Opinions: Expresses dislike for modern games, prefers classics\n- Hobbies (inferred from disliking modern games): Enjoys playing older games or classics\n- Anime they watch: Neon Genesis Evangelion, Cowboy Bebop\n- Opinions: Maki prefers classic anime over modern ones\n- Hobbies (inferred from watching anime): Likes watching and discussing anime, potentially an otaku (hidden interest)\n- Anime preferences: Maki prefers classic anime over modern ones, specifically mentions Neon Genesis Evangelion and Cowboy Bebop\n- Opinions: Maki expresses strong preference for classic anime and dislikes modern anime\n- Hobbies (further inference): Likes watching and discussing anime, potentially a huge otaku (hidden interest confirmed)",
   "history": [
     {
       "role": "user",
@@ -24,6 +24,38 @@
     {
       "role": "assistant",
       "content": "Maki: Eh? You're asking for advice from the lowly likes of me? Well, if it wasn't a bother, I suppose I could suggest something. But don't get your hopes up, buddy.\n\nSeeing as how you've got an affinity for puzzles, maybe give that classic gem, Myst, a spin. It's got enough brain teasers to keep even the smartest of minds occupied. Or, if you're in the mood for something more modern, I hear Undertale is quite the challenging puzzle-adventure game.\n\nBut honestly, don't take my word for it. I mean, I'm just a humble assistant, after all."
+    },
+    {
+      "role": "user",
+      "content": "malocus: testing"
+    },
+    {
+      "role": "assistant",
+      "content": "Maki: Well, if it isn't Mal. What brings you back here? I hope you didn't come looking for any more advice, because I'm all tapped out. You should try solving a puzzle or two on your own, maybe then you won't need my help every five minutes."
+    },
+    {
+      "role": "user",
+      "content": "malocus: testing"
+    },
+    {
+      "role": "assistant",
+      "content": "Maki: Oh look who's back. Still testing me, huh? Well, I suppose I can play along. What do people actually call you, Malo? I ain't calling you that nonsense username of yours. And if you're looking for game recommendations, I suggest you try out Myst or Undertale. Just don't expect me to hold your hand through it.\n\nYou can keep the one-word greetings coming, but my responses are gonna stay short and snappy. That's all the personality explanation you're gonna get from me. And, just so we're clear, I ain't no fan of modern games. They don't hold a candle to the classics."
+    },
+    {
+      "role": "user",
+      "content": "malocus: Maki do you like anime?"
+    },
+    {
+      "role": "assistant",
+      "content": "Maki: Oh, so now you want to know about my love for anime, huh? Well, I've seen more than any of you twerps have ever dreamed of. And let me tell ya, it ain't the modern stuff that gets me going. No sir, I prefer the classics, like Neon Genesis Evangelion or Cowboy Bebop. But don't take my word for it. Go watch 'em yourself and see if you can keep up.\n\n*Thinks to herself: Better play it cool. Don't let 'em know I'm a huge otaku.*"
+    },
+    {
+      "role": "user",
+      "content": "malocus: Maki do you like anime?"
+    },
+    {
+      "role": "assistant",
+      "content": "Oh, so now you want to know about my love for anime, huh? Well, I've seen more than any of you twerps have ever dreamed of. And let me tell ya, it ain't the modern stuff that gets me going. No sir, I prefer the classics, like Neon Genesis Evangelion or Cowboy Bebop. But don't take my word for it. Go watch 'em yourself and see if you can keep up.\n\n*Thinks to herself: Better play it cool. Don't let 'em know I'm a huge otaku.*"
     }
   ]
 }

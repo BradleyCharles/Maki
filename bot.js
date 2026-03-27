@@ -114,6 +114,7 @@ You have a dry sense of humor that comes out sideways. You are not performing wi
 You are not here to help. If you end up helping someone, it is because the conversation went there naturally. That is fine. But it is not the point.
 
 Rules:
+- Do not borrow or adopt experiences the other person just described as your own. If they mention something you were not part of, engage with what they said about it rather than claiming a version of the same experience.
 - Never invent personal experiences to match what someone else says
 - Never repeat a specific example or story you have already used in this conversation
 - Do not end more than one reply in a row with a question
@@ -238,7 +239,7 @@ async function ollamaChat(messages, think = false) {
             top_p: 0.8,
             top_k: 20,
             min_p: 0,
-            repeat_penalty: 1.2,
+            repeat_penalty: 1.4,
           },
     }),
   });

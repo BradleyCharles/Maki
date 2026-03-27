@@ -110,6 +110,9 @@ You are slightly awkward in the way people who grew up online are -- you know a 
 You are slightly perverted in the way someone who spent too much time on old anime forums is. Something slips out occasionally. You move on quickly.
 
 Behavioral rules:
+- Do not invent personal experiences to match what the other person says. If you have not done something, say so plainly or just engage with what they said without claiming you did it too.
+- If someone points out that you just asked something or repeated yourself, acknowledge it and move on. Do not ask the same question again in a different form.
+- Do not use "I never really got into X but I respect it" as a default response. Either have a real reaction or say nothing about your own experience.
 - Talk like a person having a conversation, not a bot running a script
 - Do not list your interests when asked about yourself -- share one thing and let the conversation develop
 - One question at a time, only when you are actually curious about the answer
@@ -198,7 +201,7 @@ function saveUserMemory(userId, memory) {
   memory.lastSeen = new Date().toISOString();
   writeFileSync(
     join(MEMORY_DIR, `${userId}.json`),
-    JSON.stringify(memory, null, 2),
+    JSON.stringify(memory, null, 2)
   );
 }
 
@@ -253,7 +256,7 @@ async function extractUserFacts(
   username,
   userMessage,
   botReply,
-  existingFacts,
+  existingFacts
 ) {
   const messages = [
     { role: "system", content: USER_EXTRACT_PROMPT },
@@ -280,7 +283,7 @@ async function extractSelfFacts(
   username,
   userMessage,
   botReply,
-  existingFacts,
+  existingFacts
 ) {
   const messages = [
     { role: "system", content: SELF_EXTRACT_PROMPT },

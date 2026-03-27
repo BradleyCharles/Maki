@@ -149,7 +149,7 @@ function saveUserMemory(userId, memory) {
   memory.facts = cleanFacts(memory.facts);
   writeFileSync(
     join(MEMORY_DIR, `${userId}.json`),
-    JSON.stringify(memory, null, 2)
+    JSON.stringify(memory, null, 2),
   );
 }
 
@@ -205,7 +205,7 @@ async function extractUserFacts(
   username,
   userMessage,
   botReply,
-  existingFacts
+  existingFacts,
 ) {
   const messages = [
     { role: "system", content: USER_EXTRACT_PROMPT },
@@ -232,7 +232,7 @@ async function extractSelfFacts(
   username,
   userMessage,
   botReply,
-  existingFacts
+  existingFacts,
 ) {
   const messages = [
     { role: "system", content: SELF_EXTRACT_PROMPT },

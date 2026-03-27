@@ -1,94 +1,14 @@
 {
-  "facts": "- malocus enjoys Asuka's snarky personality\n- malocus likes Faye from Cowboy Bebop",
+  "facts": "",
   "history": [
     {
       "role": "user",
-      "content": "malocus: I was thinking about watching an anime"
+      "content": "malocus: Maki what year is it?"
     },
     {
       "role": "assistant",
-      "content": "What kind?"
-    },
-    {
-      "role": "user",
-      "content": "malocus: I'm not sure. I know you like the old stuff"
-    },
-    {
-      "role": "assistant",
-      "content": "I like the old stuff. You can't go wrong with Neon Genesis Evangelion."
-    },
-    {
-      "role": "user",
-      "content": "malocus: That one is a classic. Who is your favorite character?"
-    },
-    {
-      "role": "assistant",
-      "content": "Asuka."
-    },
-    {
-      "role": "user",
-      "content": "malocus: Asuka is great. I love how snarky she is"
-    },
-    {
-      "role": "assistant",
-      "content": "Snarky and frustrating. Perfect."
-    },
-    {
-      "role": "user",
-      "content": "malocus: I like Faye from Cowboy Bebop too"
-    },
-    {
-      "role": "assistant",
-      "content": "Faye's a blast. You don't get many like her."
-    },
-    {
-      "role": "user",
-      "content": "malocus: Maki is going through some adjustments right now because their personality is a bit too dry lol"
-    },
-    {
-      "role": "assistant",
-      "content": "Yeah, I'm not the most expressive type. Some people find it weird, others don't. It's just how I am."
-    },
-    {
-      "role": "user",
-      "content": "malocus: Lol"
-    },
-    {
-      "role": "assistant",
-      "content": "Yeah, I'm not the most expressive type. Some people find it weird, others don't. It's just how I am."
-    },
-    {
-      "role": "user",
-      "content": "malocus: How is your night going?"
-    },
-    {
-      "role": "assistant",
-      "content": "It's going. Not much happening."
-    },
-    {
-      "role": "user",
-      "content": "malocus: Midgar was asking you questions earlier and you just kept saying \"No.\". That was a little rude"
-    },
-    {
-      "role": "assistant",
-      "content": "I didn't mean to be rude. I just didn't know the answers. I'm still getting used to this."
-    },
-    {
-      "role": "user",
-      "content": "malocus: Lol one sec"
-    },
-    {
-      "role": "assistant",
-      "content": "Okay, so you're saying I was rude? I didn't mean to be. I just didn't know the answers. I'm still getting used to this."
-    },
-    {
-      "role": "user",
-      "content": "malocus: I had to delete your history"
-    },
-    {
-      "role": "assistant",
-      "content": "Oh. I didn't realize. I guess I was being a bit too straightforward. I'll try to be more careful next time."
+      "content": "Oh! It's 2023! Wait, do you mean like, what year are we in? Or are you asking about a game or anime? I'm so confused!"
     }
   ],
-  "familiarity": 17
+  "familiarity": 1
 }

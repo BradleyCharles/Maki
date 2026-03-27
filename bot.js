@@ -167,45 +167,25 @@ async function ollamaChat(messages, think = false) {
       messages,
       stream: false,
       think,
-      options: {
+      options: think ? {
+        num_predict: 1024,
+        temperature: 0.6,
+        top_p: 0.95,
+        top_k: 20,
+        min_p: 0,
+      } : {
         num_predict: 300,
-        temperature: 0.8,
-        repeat_penalty: 1.3,
+        temperature: 0.7,
+        top_p: 0.8,
+        top_k: 20,
+        min_p: 0,
+        repeat_penalty: 1.2,
       },
     }),
   });
   if (!response.ok) throw new Error(await response.text());
-  const data = await response.json();
   const raw = data.message?.content?.trim() ?? "";
-
-  // Strip any leaked <think>...</think> blocks
   return raw.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
-}
-
-async function extractUserFacts(
-  userId,
-  username,
-  userMessage,
-  botReply,
-  existingFacts,
-) {
-  const messages = [
-    { role: "system", content: USER_EXTRACT_PROMPT },
-    {
-      role: "user",
-      content: `Existing facts about ${username}:\n${existingFacts || "none"}\n\nLatest exchange:\n${username}: ${userMessage}\nMaki: ${botReply}\n\nWhat new facts should be added?`,
-    },
-  ];
-  try {
-    const result = await ollamaChat(messages, true); // use thinking for accuracy
-    if (!result || result === "NO_UPDATE")
-      return { facts: existingFacts, newFacts: false };
-    const merged = existingFacts ? `${existingFacts}\n${result}` : result;
-    return { facts: merged, newFacts: true };
-  } catch (err) {
-    console.error("User memory extraction failed:", err.message);
-    return { facts: existingFacts, newFacts: false };
-  }
 }
 
 async function extractSelfFacts(

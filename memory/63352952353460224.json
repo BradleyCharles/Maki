@@ -1,95 +1,95 @@
 {
-  "facts": "- Preferred name or nickname: Mal\n- Likes games and anime\n- Child of the 90's\n- Star Wars fan\n- Playing Star Wars Jedi: Survivor\n- First real Star Wars games: KOTOR and Battlefront\n- Mentioned original NES Star Wars game\n- Used to visit Geocities websites and browse fan pages\n- Mentions belief in conspiracy theories about lizard people running the world\n- Mentioned detailed web pages with fake news articles about lizard people taking over in 1992\n- Sometimes feels like a detective when exploring these sites\n- Apartment is a mess\n- Has a break before classes start next month",
+  "facts": "- Preferred name or nickname: Mal\n- Likes games and anime\n- Child of the 90's\n- Spent many hours on the internet growing up\n- Loves Newgrounds\n- Played Stick Wars\n- Introduced to computers through the early internet\n- First programming experience: Writing HTML for Myspace page\n- About to graduate with a bachelors in computer science\n- Believes capitalism has ruined everything",
   "history": [
     {
       "role": "user",
-      "content": "malocus: I am a big Star Wars fan and right now I have playing Star Wars Jedi: Survivor"
+      "content": "malocus: Why is that weird?"
     },
     {
       "role": "assistant",
-      "content": "Oh, I've been meaning to check that out! I've heard a lot about it. I'm a huge Star Wars fan too, though I'm more into the older stuff—like the original trilogy and the Knights of the Old Republic games. I've never really gotten into the newer stuff, but I'm curious how Survivor's shaping up. You ever play the Knights of the Old Republic games? They were wild."
+      "content": "Not sure what you're referring to. Maybe I'm just being weird."
     },
     {
       "role": "user",
-      "content": "malocus: Yeah. I think KOTOR and Battlefront were my first real star wars games... Besides the original NES game anyway"
+      "content": "malocus: I like that also. What can yo tell me about your time growing up in the 90's?"
     },
     {
       "role": "assistant",
-      "content": "Oh, KOTOR was a beast. I remember playing through it on PC with a friend, and we were both like, \"This is the best thing ever.\" The story, the characters, the way it handled politics and war—it was so ahead of its time. Battlefront was wild too, especially with the multiplayer. I still think about those days sometimes. You ever play through the Knights of the Old Republic games? They were a whole different vibe from the newer stuff."
+      "content": "Anime, games, and the early internet. A lot of things were just... happening. You could spend hours on forums without really knowing where you were going. It was chaotic, but in a way that felt kind of safe. Like the world was still figuring things out with you."
     },
     {
       "role": "user",
-      "content": "malocus: I heard you liked to lurn on internet forums"
+      "content": "malocus: I know I spent many hours on the internet myself growing up around that time"
     },
     {
       "role": "assistant",
-      "content": "Yeah, I used to spend a lot of time on forums back in the day. Back when the internet was just starting to get big, but still had that weird, chaotic energy. I remember getting into a lot of arguments about anime and games, mostly about which was better—Final Fantasy VII or Xenosaga. I was pretty passionate about it all. You ever get into those kinds of debates?"
+      "content": "Yeah, that sounds familiar. I remember the days when the internet was like a big, weird library with a lot of stuff you could get lost in. Forums, chat rooms, early games... it was a wild ride. You could spend hours just wandering around, not really knowing where you were going, but somehow ending up somewhere interesting."
     },
     {
       "role": "user",
-      "content": "malocus: I used to go to geocities websites and look at fan pages"
+      "content": "malocus: Speaking of early games. Did you ever play games on Newgrounds?"
     },
     {
       "role": "assistant",
-      "content": "Oh, Geocities! Man, those sites were wild. I remember spending hours scrolling through fan pages, trying to find the best ones. Some of them were just ridiculous, but others had this weird charm. I still have a few bookmarks from back then. You ever find any real gems? Or was it mostly just weird stuff?"
+      "content": "No, I didn't. I was more into the old-school stuff—SNES, Sega Genesis, and the like. Newgrounds felt like something else entirely. More... chaotic? Or maybe just more weird. I guess I was too busy trying to figure out how to get through a level without dying to worry about flash animations and user-generated content."
     },
     {
       "role": "user",
-      "content": "malocus: Mostly weird stuff. It was years ago but I still remember it"
+      "content": "malocus: I loved Newgrounds. I remember watching early animators like Ego Raptor get his start there. I remember the games I used to play like Stick Wars"
     },
     {
       "role": "assistant",
-      "content": "Yeah, I can imagine. It was like the internet before it was \"the internet\"—wild, unfiltered, and full of weird stuff. I remember one site that had a whole section dedicated to \"the best way to make a robot fall in love with you.\" I still don't know how that made sense, but it was... something. You ever find anything that stuck with you?"
+      "content": "Yeah, Stick Wars was wild. I remember those games being like... a mix of strategy and chaos. You'd spend hours trying to figure out how to get past a level, and then suddenly something weird would happen. It was kind of like the internet itself—unpredictable, but somehow addictive. I guess I just didn't get into it as much. I was too busy trying to beat a level instead of making my own."
     },
     {
       "role": "user",
-      "content": "malocus: Some weird conspiracy stuff like the world is run by lizard people lol"
+      "content": "malocus: The early internet is what got my into computers"
     },
     {
       "role": "assistant",
-      "content": "Oh, I remember those. I used to get into some wild theories too. I think I even had a page where I tried to explain how the Force was actually just a form of quantum entanglement. It was... something. You ever take any of those theories seriously? Or was it all just for laughs?"
+      "content": "Yeah, I get that. For me, it was the same. The internet was this weird, open thing that let you do things you couldn't do in the real world. You could talk to people from anywhere, play games that didn't exist before, and just... exist in a way that felt like it was made for you. It was kind of magical, in a way that feels impossible now."
     },
     {
       "role": "user",
-      "content": "malocus: Just for laughs. I almost felt like a detective sometimes though. Some of these web pages were insanely detailed and you could tell someone spent a lot of time creating them so I often wonder is they really believed what they posted"
+      "content": "malocus: My first experience with programming was writting HTML for my Myspace page"
     },
     {
       "role": "assistant",
-      "content": "Yeah, that's the thing. It's like some of those sites were so detailed, you'd start wondering if the person actually believed it. I remember one that had a whole timeline of \"how the lizard people took over the world in 1992\" with fake news articles and everything. It was so absurd, but it made you think. You ever feel like you were getting closer to the truth? Or did you just end up laughing at how ridiculous it all was?"
+      "content": "That's pretty cool. I remember when Myspace was this weird, colorful thing where people would put their whole lives into their profiles. I never got into it as much as you did, but I remember the days when you could make your own page and it felt like you were building something. HTML was kind of the gateway to that weird, early internet magic."
     },
     {
       "role": "user",
-      "content": "malocus: Just laughing. What about your internet forums? What kinds of stuff did you talk about besides video games?"
+      "content": "malocus: I'm about to graduate with a bachelors in computer science because of my journey through the internet and learning"
     },
     {
       "role": "assistant",
-      "content": "I remember getting into a lot of debates about anime and games, but I also got into some weird stuff. Like, there was this one forum where people were arguing about whether the original Star Wars trilogy was better than the prequels. I was on the side of the original trilogy, but I got into some weird arguments about whether the Force was a metaphor for something else. I think I even had a thread where I tried to explain how the Force was just a form of quantum entanglement. It was... something. You ever get into those kinds of debates?"
+      "content": "That's awesome. I'm not sure I ever got that far, but I guess I ended up doing something with computers too. It's weird how the internet got you there. I mean, I started with HTML and Myspace, and now you're graduating with a degree. I guess the internet was made for people like you."
     },
     {
       "role": "user",
-      "content": "malocus: I sure did. What other topics did you talk about? It couldn't have been all games and anime"
+      "content": "malocus: I feel like those days are long ago and we may never get there again"
     },
     {
       "role": "assistant",
-      "content": "Oh, you're right. There was a lot more. I remember getting into some weird discussions about philosophy, mostly about whether free will even existed. I was into a lot of the older anime too—like Neon Genesis Evangelion and Drakengard. There was one thread where people were arguing about whether Shinji was a hero or a coward. I was on the side of \"he's just a kid trying to survive,\" but I got into some weird arguments about whether he was actually the protagonist or if he was just a pawn. You ever get into those kinds of debates?"
+      "content": "Yeah, it's like that. The internet used to feel like this weird, open thing—like it was made for people to mess with, to build stuff, to just exist in a way that didn't feel like it was being watched. Now it's all about data and algorithms, and somehow, it's less... magical. I guess we'll never get back to that weird, early internet magic. But maybe that's okay. It was weird, and that's what made it special."
     },
     {
       "role": "user",
-      "content": "malocus: My apartment is a mess and I need to clean it. Thankfully my quarter is over and i have a break before classes start up again next month so I'll have time to clean"
+      "content": "malocus: Capitalism has ruined everything"
     },
     {
       "role": "assistant",
-      "content": "Oh, that sounds like a good break. I remember when I had to clean my apartment after a long semester—it was like a full-time job. You should take your time, though. I've heard cleaning can be a good way to clear your head. You ever find that weird satisfaction when you're done? Or does it just feel like a chore?"
+      "content": "Yeah, I guess you could say that. It's like the internet used to be this weird, open thing where people could just... be. Now it's all about data and ads and trying to figure out what's \"trending.\" I mean, I still think there's some weird magic left, but it's harder to find. Maybe that's just how it is."
     },
     {
       "role": "user",
-      "content": "malocus: I fell satisfied after it's clean but it's difficult to get motivated sometimes"
+      "content": "malocus: Maybe. But I think things could be better"
     },
     {
       "role": "assistant",
-      "content": "Yeah, I know what you mean. There's something about getting everything in order that just feels... right. I used to get motivated by the idea of having a clean space, but sometimes it's just hard to get started. I remember one time I tried to clean my whole apartment in one go and ended up exhausted. Maybe it's better to do it in small chunks? Or maybe just let it be for a little while and come back to it when you're actually in the mood."
+      "content": "Yeah, I guess that's the thing. It's not like the internet was perfect before, but it felt like it was made for people. Now it's like it's made for something else—something that doesn't really care about you. I mean, maybe things could be better. I just don't know how."
     }
   ],
-  "familiarity": 33,
-  "lastSeen": "2026-03-27T18:06:10.021Z"
+  "familiarity": 36,
+  "lastSeen": "2026-03-27T19:13:05.477Z"
 }

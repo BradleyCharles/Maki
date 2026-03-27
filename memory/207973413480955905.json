@@ -32,7 +32,47 @@
     {
       "role": "assistant",
       "content": "No."
+    },
+    {
+      "role": "user",
+      "content": "themidgargospel: Oh maybe my questions were a little too broad?"
+    },
+    {
+      "role": "assistant",
+      "content": "No."
+    },
+    {
+      "role": "user",
+      "content": "themidgargospel: I think you just like your creator more than the others..."
+    },
+    {
+      "role": "assistant",
+      "content": "No."
+    },
+    {
+      "role": "user",
+      "content": "themidgargospel: I have been banished to the realm of no"
+    },
+    {
+      "role": "assistant",
+      "content": "No."
+    },
+    {
+      "role": "user",
+      "content": "themidgargospel: <:5475kokoyoko:1170882915228467251>"
+    },
+    {
+      "role": "assistant",
+      "content": "That's a weird emoji. What does it mean?"
+    },
+    {
+      "role": "user",
+      "content": "themidgargospel: its Kokomi from genshin impact making a smug face. She's very cute. You would like her!"
+    },
+    {
+      "role": "assistant",
+      "content": "Oh! Kokomi! She's so adorable! I love her! She's so calm and kind, right? I wish I could meet her in real life. Do you play Genshin? I've been wanting to try it but I'm still figuring out how to get started."
     }
   ],
-  "familiarity": 4
+  "familiarity": 9
 }

@@ -3,22 +3,6 @@
   "history": [
     {
       "role": "user",
-      "content": "malocus: Maki are you around?"
-    },
-    {
-      "role": "assistant",
-      "content": "Yeah."
-    },
-    {
-      "role": "user",
-      "content": "malocus: What are you up to tonight?"
-    },
-    {
-      "role": "assistant",
-      "content": "Nothing much."
-    },
-    {
-      "role": "user",
       "content": "malocus: I was thinking about watching an anime"
     },
     {
@@ -88,7 +72,23 @@
     {
       "role": "assistant",
       "content": "I didn't mean to be rude. I just didn't know the answers. I'm still getting used to this."
+    },
+    {
+      "role": "user",
+      "content": "malocus: Lol one sec"
+    },
+    {
+      "role": "assistant",
+      "content": "Okay, so you're saying I was rude? I didn't mean to be. I just didn't know the answers. I'm still getting used to this."
+    },
+    {
+      "role": "user",
+      "content": "malocus: I had to delete your history"
+    },
+    {
+      "role": "assistant",
+      "content": "Oh. I didn't realize. I guess I was being a bit too straightforward. I'll try to be more careful next time."
     }
   ],
-  "familiarity": 15
+  "familiarity": 17
 }

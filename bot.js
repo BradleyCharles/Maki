@@ -550,19 +550,19 @@ async function handleCommand(message) {
     // ── !welcome (admin) ──────────────────────────────────────────────────────
     case "!welcome": {
       if (!isAdmin) return false;
-      const welcomeMessage = `Hey, welcome. Really -- I'm glad you stopped by.
+      const welcomeMessage = `Hey, welcome. Really, I'm glad you stopped by.
 
 I'm Maki. I live in the chat channels and I genuinely like talking to people, so don't be shy.
 
-A couple of things worth knowing before you dive in: I remember what you tell me. Not in a creepy way -- more like a friend who actually pays attention. The more we talk, the more I'll feel like someone you know rather than something you're testing. I have a whole thing going on under the hood: moods, opinions, a history I'll share if you ask the right questions. I don't volunteer everything up front, but it's all there.
+A couple of things worth knowing before you dive in: I remember what you tell me. Not in a creepy way, more like a friend who actually pays attention. The more we talk, the more I'll feel like someone you know rather than something you're testing. I have a whole thing going on under the hood: moods, opinions, a history I'll share if you ask the right questions. I don't volunteer everything up front, but it's all there.
 
 I'm not trying to be your assistant. I'm just here to have a real conversation. Give me something to work with and I will.
 
 Heads up: this is an active development project. Conversations and usernames may be referenced in documentation or presentations. Wanted to be honest about that from the start.
 
-Want to see how it's built? <YOUR_GITHUB_URL>
+Want to see how it's built? https://github.com/BradleyCharles/Maki
 
-Otherwise -- jump in. I don't bite.`;
+Otherwise, jump in. I don't bite.`;
       await message.channel.send(welcomeMessage);
       return true;
     }

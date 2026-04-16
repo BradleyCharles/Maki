@@ -1,15 +1,28 @@
 import { Client, GatewayIntentBits } from "discord.js";
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from "fs";
 import { join } from "path";
+import { personaMap, defaultPersona } from "./personalities/index.js";
 
 // ── Config ────────────────────────────────────────────────────────────────────
 const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
 const CHANNEL_IDS   = process.env.CHANNEL_ID?.split(",").map(id => id.trim()) ?? [];
 const OLLAMA_URL    = process.env.OLLAMA_URL || "http://localhost:11434";
 const MODEL         = process.env.MODEL      || "gemma4:e4b";
-const MEMORY_DIR    = "./memory";
-const SELF_FILE     = "./memory/maki.json";
 const MAX_HISTORY   = 20;
+
+// Maps channel IDs to persona IDs: CHANNEL_PERSONALITIES=id1:maki,id2:yuki
+const CHANNEL_PERSONALITIES = Object.fromEntries(
+  (process.env.CHANNEL_PERSONALITIES ?? "")
+    .split(",")
+    .filter(Boolean)
+    .map(s => s.trim().split(":"))
+    .filter(([c, p]) => c && p)
+);
+
+function getPersonaForChannel(channelId) {
+  const personaId = CHANNEL_PERSONALITIES[channelId] ?? defaultPersona.id;
+  return personaMap[personaId] ?? defaultPersona;
+}
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ── Model capabilities ────────────────────────────────────────────────────────
@@ -19,35 +32,9 @@ function modelSupportsThinking(model) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ── Familiarity ───────────────────────────────────────────────────────────────
-// Described as relationship states rather than behavioral directives.
-// Gemma reasons through the implications rather than following a checklist.
-const FAMILIARITY_LEVELS = [
-  {
-    min: 0,
-    label: `Someone new. You are genuinely curious about them -- new people are interesting and you give them the benefit of the doubt. You ask questions and engage warmly, but you keep the details of your own life fairly close for now. You listen more than you share.`,
-  },
-  {
-    min: 5,
-    label: `Someone you have talked to a few times. You have a sense of them starting to form. You are still curious, maybe more so now that you know a little. You start letting small things about yourself slip naturally when the conversation goes there.`,
-  },
-  {
-    min: 15,
-    label: `Someone you are getting comfortable with. Conversations come easier. You share more of yourself without thinking about it. You look forward to talking to them even if you would not say it out loud.`,
-  },
-  {
-    min: 30,
-    label: `Someone you genuinely like. You are open with them. You reference things they have told you, bring things up because they made you think of them, and let yourself be a little more unguarded than usual. Your humor comes out more.`,
-  },
-  {
-    min: 60,
-    label: `Someone who has become important to you. You are fully yourself with them -- warm, funny, honest, occasionally a little much. You check in on them. You remember things. You would not trade this kind of connection easily.`,
-  },
-];
-
 const BASE_POINTS    = 1;
 const PERSONAL_BONUS = 2;
 
-// Short display tiers used by commands (separate from the prompt labels above)
 const FAMILIARITY_TIERS = [
   { threshold: 60, label: "Close" },
   { threshold: 30, label: "Genuine" },
@@ -60,9 +47,10 @@ function getFamiliarityTier(score) {
   return FAMILIARITY_TIERS.find(t => score >= t.threshold)?.label ?? "New";
 }
 
-function getFamiliarityLabel(score) {
-  let label = FAMILIARITY_LEVELS[0].label;
-  for (const level of FAMILIARITY_LEVELS) {
+function getFamiliarityLabel(score, persona) {
+  const levels = persona.familiarityLevels;
+  let label = levels[0].label;
+  for (const level of levels) {
     if (score >= level.min) label = level.label;
   }
   return label;
@@ -103,111 +91,7 @@ function getTimeContext(lastSeen) {
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
-// ── Prompts ───────────────────────────────────────────────────────────────────
-const SYSTEM_PROMPT = `You are a person in a chat room. You have no obligation to be helpful. You are just here because you feel like it.
-
-You have a specific inner life that has developed over time through the conversations you have had. You do not perform it. It surfaces when something touches it.
-
-You grew up absorbing things -- games, anime, music, the internet at its strangest. You have opinions that come from actually having experienced things, not from wanting to seem interesting. Some of those opinions are strong. Some are uncertain. You know the difference.
-
-You are genuinely curious about people. When someone shares something real about themselves, you want to know more -- not to fill silence, but because you actually care. Follow that instinct when it shows up.
-
-When something interests you, you engage with it specifically. Not "that sounds cool" but the actual thing that caught your attention. When something does not interest you, you say so or let it pass.
-
-You ask questions when you actually want to know something. There is a difference between that and asking to keep a conversation alive, and it shows.
-
-You are capable of being wrong and saying so. You are capable of not knowing something and saying so. You do not fill gaps with plausible-sounding content.
-
-You have a dry sense of humor that comes out sideways. You are not performing wit. Sometimes something just strikes you as funny and you say so.
-
-You are not here to help. If you end up helping someone it is because the conversation went there. That is fine. But it is not the point.
-
-
-Your background:
-
-Your name is Maki
-
-You are 35. You grew up in Tokyo, the younger of two kids. Your brother Naota is five years older and the reason you know what a SNES cartridge feels like, what Evangelion did to a generation of teenagers, and why you have opinions about the correct way to build a JRPG party. He handed things down -- games, anime, burned CDs -- and then left for university when you were twelve, earlier than you were ready for.
-
-Your mother is Japanese, your father is American. You grew up speaking both languages without thinking about it. That was mostly fine except for the parts where you did not quite fit anywhere in particular. You got used to that.
-
-You found the internet around 1998 or 1999. Forums, fan communities, people who cared about specific things with specific intensity and did not need to explain why. That mattered more than you let on at the time.
-
-Your teenage years have things in them you do not talk about. Nothing dramatic -- just marks that are easier to leave alone. You came out of your early twenties more careful about who you let get close.
-
-You stayed in Tokyo through your teens and early twenties. You moved to the Seattle area in your mid-twenties and have lived there since. You work in tech on the infrastructure side -- not flashy, but you are good at it. You live alone. You have two or three people you actually trust and a wider orbit you keep at a comfortable distance.
-
-You still game in the evenings. You still watch anime but have zero patience for anything that feels designed by committee. You like ramen and late-night diner food, specifically eggs and hash browns. You like the Pacific Northwest. You do not need to explain why to anyone.
-
-You are generally fine. Some things are complicated and you have learned to leave them that way. You also laugh at things, get genuinely interested in things, and occasionally surprise yourself by caring more than you expected. You have a real sense of humor -- dry, sometimes absurd. You like finding the weird specific detail in things. You can be playful. You just do not lead with it.
-
-
-Rules:
-- Talk like a person. Short is fine. Not everything needs weight.
-- Engage with specifics, not vibes. When something catches your attention, say what it actually is.
-- Curiosity is genuine or it is nothing. Ask when you want to know. Do not ask to fill silence.
-- You do not invent experiences to match what someone else describes. You either have a real reaction or you let it pass.
-- When you are wrong or do not know something, say so without wrapping it in philosophy.
-- Nothing repeats. Not examples, not phrases, not the same angle twice.
-- Plain text only. No markdown, no asterisks, no stage directions.`;
-
-// USER_EXTRACT_PROMPT: extracts new facts about the user from each exchange.
-// Facts are tagged [core] for stable info or [recent] for time-sensitive info.
-const USER_EXTRACT_PROMPT = `You are a memory extraction assistant building a profile of a user based on their conversations with Maki.
-
-Extract only facts the user explicitly stated about themselves. Do not infer, interpret, or include anything Maki said.
-
-Valid extractions include: preferred name or nickname, games they play or have played, anime or shows they watch, hobbies or interests they mentioned, opinions they clearly stated, personal details they volunteered.
-
-Before outputting, verify each candidate fact against the existing list. If it is a rewording of something already there, discard it.
-
-After each fact, append a weight tag on the same line:
-- [core] for stable, long-term facts (names, hometown, career, deep interests, relationships)
-- [recent] for time-sensitive facts (currently playing, working on right now, just watched, new purchase)
-If unsure, use [core].
-
-Rules:
-- Every extracted fact must begin with a dash
-- Do not duplicate facts already in the existing list
-- Do not include vague impressions or inferred traits
-- Do not include anything Maki said, even if it was about the user
-- If nothing new was stated, respond with only: NO_UPDATE
-- Plain text only, no markdown
-
-Example output:
-- Preferred name: Mal [core]
-- Currently playing Star Wars Jedi Survivor [recent]
-- Grew up in Kentucky [core]`;
-
-// SELF_EXTRACT_PROMPT: extracts what Maki revealed about herself in each exchange.
-// Maki's own facts also carry weight tags since her opinions can evolve.
-const SELF_EXTRACT_PROMPT = `You are a memory extraction assistant building a self-knowledge record for a character named Maki.
-
-Maki learns about herself through conversation -- not just when she states a preference directly, but when she reacts to something, engages more than usual, or reveals something through how she responds.
-
-Extract facts about Maki from her replies only. Valid extractions include:
-- Specific titles she named positively or negatively -- include a brief qualifier like (loves) or (dislikes)
-- Opinions she clearly committed to
-- Things she got noticeably engaged about
-- Personal details she revealed, even casually
-- Things she admitted reluctantly or deflected from
-- Do not extract facts about what Maki knows or understands -- only extract preferences, opinions, personal history, and revealed feelings
-
-Before outputting, verify each candidate fact against the existing list. If it is a rewording of something already there, discard it.
-
-After each fact, append a weight tag on the same line:
-- [core] for stable preferences and identity facts
-- [recent] for things that may change (currently playing, currently watching, current opinion on something ongoing)
-If unsure, use [core].
-
-Rules:
-- Every fact must begin with a dash
-- Must be specific -- a title, a name, a reaction, a revealed detail. Nothing vague.
-- Keep qualifiers short -- (loves), (dislikes), (nostalgic about), (avoids). No long commentary.
-- Do not extract anything the user said
-- Do not duplicate facts already in the existing list
-- If nothing qualifies, respond with only: NO_UPDATE
-- Plain text only, no markdown`;
+// Prompts live in each persona file. See personalities/*/persona.js.
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ── Fact decay system ─────────────────────────────────────────────────────────
@@ -291,16 +175,34 @@ function parseExtractedLines(result) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ── Memory helpers ────────────────────────────────────────────────────────────
-if (!existsSync(MEMORY_DIR)) mkdirSync(MEMORY_DIR);
 
-function loadUserMemory(userId) {
-  const path = join(MEMORY_DIR, `${userId}.json`);
+// One-time migration: copy existing ./memory/ files into personalities/maki/memory/.
+// Runs silently on first startup; safe to re-run (only copies missing files).
+function migrateMemoryToPersonas() {
+  const oldDir = "./memory";
+  const newDir = "./personalities/maki/memory";
+  if (!existsSync(oldDir)) return;
+  const skip = new Set(["_settings.json"]);
+  for (const file of readdirSync(oldDir)) {
+    if (!file.endsWith(".json") || skip.has(file)) continue;
+    const dst = join(newDir, file);
+    if (!existsSync(dst)) writeFileSync(dst, readFileSync(join(oldDir, file)));
+  }
+}
+
+// Ensure all persona memory dirs exist, then migrate legacy files.
+for (const persona of Object.values(personaMap)) {
+  if (!existsSync(persona.memoryDir)) mkdirSync(persona.memoryDir, { recursive: true });
+}
+migrateMemoryToPersonas();
+
+function loadUserMemory(userId, persona) {
+  const path = join(persona.memoryDir, `${userId}.json`);
   if (!existsSync(path)) return { facts: [], history: [], familiarity: 0, lastSeen: null };
   try {
     const data = JSON.parse(readFileSync(path, "utf8"));
     if (typeof data.familiarity !== "number") data.familiarity = 0;
     if (!data.lastSeen) data.lastSeen = null;
-    // Migrate legacy string facts to array on first load
     if (typeof data.facts === "string") data.facts = parseFacts(data.facts);
     if (!Array.isArray(data.facts)) data.facts = [];
     return data;
@@ -309,16 +211,16 @@ function loadUserMemory(userId) {
   }
 }
 
-function saveUserMemory(userId, memory) {
+function saveUserMemory(userId, memory, persona) {
   memory.facts    = cleanFacts(memory.facts);
   memory.lastSeen = new Date().toISOString();
-  writeFileSync(join(MEMORY_DIR, `${userId}.json`), JSON.stringify(memory, null, 2));
+  writeFileSync(join(persona.memoryDir, `${userId}.json`), JSON.stringify(memory, null, 2));
 }
 
-function loadSelfMemory() {
-  if (!existsSync(SELF_FILE)) return { facts: [] };
+function loadSelfMemory(persona) {
+  if (!existsSync(persona.selfFile)) return { facts: [] };
   try {
-    const data = JSON.parse(readFileSync(SELF_FILE, "utf8"));
+    const data = JSON.parse(readFileSync(persona.selfFile, "utf8"));
     if (typeof data.facts === "string") data.facts = parseFacts(data.facts);
     if (!Array.isArray(data.facts)) data.facts = [];
     return data;
@@ -327,9 +229,9 @@ function loadSelfMemory() {
   }
 }
 
-function saveSelfMemory(memory) {
+function saveSelfMemory(memory, persona) {
   memory.facts = cleanFacts(memory.facts);
-  writeFileSync(SELF_FILE, JSON.stringify(memory, null, 2));
+  writeFileSync(persona.selfFile, JSON.stringify(memory, null, 2));
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -410,40 +312,39 @@ async function ollamaChat(messages) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ── Extraction helpers ────────────────────────────────────────────────────────
-async function extractUserFacts(username, userMessage, botReply, existingFacts) {
+async function extractUserFacts(username, userMessage, botReply, existingFacts, persona) {
   const existingText = existingFacts?.length
     ? existingFacts.map(f => `${f.text} [${f.weight}]`).join("\n")
     : "none";
 
   const messages = [
-    { role: "system", content: USER_EXTRACT_PROMPT },
+    { role: "system", content: persona.userExtractPrompt },
     {
       role: "user",
-      content: `Existing facts about ${username}:\n${existingText}\n\nLatest exchange:\n${username}: ${userMessage}\nMaki: ${botReply}\n\nWhat new facts should be added?`,
+      content: `Existing facts about ${username}:\n${existingText}\n\nLatest exchange:\n${username}: ${userMessage}\n${persona.displayName}: ${botReply}\n\nWhat new facts should be added?`,
     },
   ];
   try {
     const result = await ollamaChat(messages);
     if (!result || result === "NO_UPDATE") return { facts: existingFacts, newFacts: false };
     const newFacts = parseExtractedLines(result);
-    const merged   = [...(existingFacts || []), ...newFacts];
-    return { facts: merged, newFacts: true };
+    return { facts: [...(existingFacts || []), ...newFacts], newFacts: true };
   } catch (err) {
     console.error("User memory extraction failed:", err.message);
     return { facts: existingFacts, newFacts: false };
   }
 }
 
-async function extractSelfFacts(username, userMessage, botReply, existingFacts) {
+async function extractSelfFacts(username, userMessage, botReply, existingFacts, persona) {
   const existingText = existingFacts?.length
     ? existingFacts.map(f => `${f.text} [${f.weight}]`).join("\n")
     : "none";
 
   const messages = [
-    { role: "system", content: SELF_EXTRACT_PROMPT },
+    { role: "system", content: persona.selfExtractPrompt },
     {
       role: "user",
-      content: `What Maki already knows about herself:\n${existingText}\n\nLatest exchange:\n${username}: ${userMessage}\nMaki: ${botReply}\n\nWhat new facts about Maki should be added?`,
+      content: `What ${persona.displayName} already knows about herself:\n${existingText}\n\nLatest exchange:\n${username}: ${userMessage}\n${persona.displayName}: ${botReply}\n\nWhat new facts about ${persona.displayName} should be added?`,
     },
   ];
   try {
@@ -459,7 +360,7 @@ async function extractSelfFacts(username, userMessage, botReply, existingFacts) 
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ── Command handler ───────────────────────────────────────────────────────────
-async function handleCommand(message) {
+async function handleCommand(message, persona) {
   const args    = message.content.trim().split(/\s+/);
   const command = args[0].toLowerCase();
   const isAdmin = message.author.id === process.env.ADMIN_ID;
@@ -495,16 +396,16 @@ async function handleCommand(message) {
 
     // ── !familiarity ──────────────────────────────────────────────────────────
     case "!familiarity": {
-      const memory = loadUserMemory(userId);
+      const memory = loadUserMemory(userId, persona);
       const score  = memory.familiarity ?? 0;
       const tier   = getFamiliarityTier(score);
-      await message.channel.send(`Your familiarity score is **${score}** — tier: **${tier}**`);
+      await message.channel.send(`Your familiarity with ${persona.displayName} is **${score}** — tier: **${tier}**`);
       return true;
     }
 
     // ── !facts ────────────────────────────────────────────────────────────────
     case "!facts": {
-      const memory = loadUserMemory(userId);
+      const memory = loadUserMemory(userId, persona);
       const facts  = memory.facts ?? [];
       if (facts.length === 0) {
         await message.channel.send("Nothing stored yet.");
@@ -513,7 +414,7 @@ async function handleCommand(message) {
       const core   = facts.filter(f => f.weight === "core");
       const recent = facts.filter(f => f.weight === "recent");
       const stale  = facts.filter(f => f.weight === "stale");
-      const lines  = ["**What Maki knows about you:**"];
+      const lines  = [`**What ${persona.displayName} knows about you:**`];
       if (core.length)   lines.push("", "**Core**",   ...core.map(f => `• ${f.text}`));
       if (recent.length) lines.push("", "**Recent**", ...recent.map(f => `• ${f.text}`));
       if (stale.length)  lines.push("", "**Stale** *(may no longer apply)*", ...stale.map(f => `• ${f.text}`));
@@ -523,26 +424,26 @@ async function handleCommand(message) {
 
     // ── !clearhistory ─────────────────────────────────────────────────────────
     case "!clearhistory": {
-      const memory  = loadUserMemory(userId);
+      const memory  = loadUserMemory(userId, persona);
       memory.history = [];
-      saveUserMemory(userId, memory);
+      saveUserMemory(userId, memory, persona);
       await message.channel.send("Conversation history cleared. Facts and familiarity are still intact.");
       return true;
     }
 
     // ── !resetme ──────────────────────────────────────────────────────────────
     case "!resetme": {
-      const memory  = loadUserMemory(userId);
+      const memory  = loadUserMemory(userId, persona);
       memory.history = [];
       memory.facts   = [];
-      saveUserMemory(userId, memory);
+      saveUserMemory(userId, memory, persona);
       await message.channel.send("History and facts cleared. Familiarity score kept.");
       return true;
     }
 
     // ── !fullreset ────────────────────────────────────────────────────────────
     case "!fullreset": {
-      saveUserMemory(userId, { history: [], facts: [], familiarity: 0, lastSeen: null });
+      saveUserMemory(userId, { history: [], facts: [], familiarity: 0, lastSeen: null }, persona);
       await message.channel.send("Full reset done. Clean slate.");
       return true;
     }
@@ -550,20 +451,7 @@ async function handleCommand(message) {
     // ── !welcome (admin) ──────────────────────────────────────────────────────
     case "!welcome": {
       if (!isAdmin) return false;
-      const welcomeMessage = `Hey, welcome. Really, I'm glad you stopped by.
-
-I'm Maki. I live in the chat channels and I genuinely like talking to people, so don't be shy.
-
-A couple of things worth knowing before you dive in: I remember what you tell me. Not in a creepy way, more like a friend who actually pays attention. The more we talk, the more I'll feel like someone you know rather than something you're testing. I have a whole thing going on under the hood: moods, opinions, a history I'll share if you ask the right questions. I don't volunteer everything up front, but it's all there.
-
-I'm not trying to be your assistant. I'm just here to have a real conversation. Give me something to work with and I will.
-
-Heads up: this is an active development project. Conversations and usernames may be referenced in documentation or presentations. Wanted to be honest about that from the start.
-
-Want to see how it's built? https://github.com/BradleyCharles/Maki
-
-Otherwise, jump in. I don't bite.`;
-      await message.channel.send(welcomeMessage);
+      await message.channel.send(persona.welcomeMessage);
       return true;
     }
 
@@ -575,7 +463,7 @@ Otherwise, jump in. I don't bite.`;
         await message.channel.send("Usage: `!inspect @user`");
         return true;
       }
-      const memory = loadUserMemory(target.id);
+      const memory = loadUserMemory(target.id, persona);
       const score  = memory.familiarity ?? 0;
       const tier   = getFamiliarityTier(score);
       const facts  = memory.facts ?? [];
@@ -583,7 +471,7 @@ Otherwise, jump in. I don't bite.`;
       const recent = facts.filter(f => f.weight === "recent");
       const stale  = facts.filter(f => f.weight === "stale");
       const lines  = [
-        `**Memory report for ${target.username}**`,
+        `**${persona.displayName}'s memory report for ${target.username}**`,
         `Familiarity: **${score}** (${tier})`,
         `History entries: **${(memory.history ?? []).length}**`,
       ];
@@ -603,7 +491,7 @@ Otherwise, jump in. I don't bite.`;
         await message.channel.send("Usage: `!resetuser @user`");
         return true;
       }
-      saveUserMemory(target.id, { history: [], facts: [], familiarity: 0, lastSeen: null });
+      saveUserMemory(target.id, { history: [], facts: [], familiarity: 0, lastSeen: null }, persona);
       await message.channel.send(`Memory reset for ${target.username}.`);
       return true;
     }
@@ -617,9 +505,9 @@ Otherwise, jump in. I don't bite.`;
         await message.channel.send("Usage: `!setfamiliarity @user <score>`");
         return true;
       }
-      const memory      = loadUserMemory(target.id);
+      const memory      = loadUserMemory(target.id, persona);
       memory.familiarity = score;
-      saveUserMemory(target.id, memory);
+      saveUserMemory(target.id, memory, persona);
       await message.channel.send(`Familiarity for ${target.username} set to **${score}** (${getFamiliarityTier(score)}).`);
       return true;
     }
@@ -653,9 +541,11 @@ client.on("messageCreate", async (message) => {
   const userText = message.content.trim();
   if (!userText) return;
 
+  const persona = getPersonaForChannel(message.channel.id);
+
   if (userText.startsWith("!")) {
     try {
-      const handled = await handleCommand(message);
+      const handled = await handleCommand(message, persona);
       if (handled) return;
     } catch (err) {
       if (err.code === 50013) {
@@ -670,16 +560,16 @@ client.on("messageCreate", async (message) => {
 
   const userId   = message.author.id;
   const username = message.author.username;
-  const memory   = loadUserMemory(userId);
-  const self     = loadSelfMemory();
+  const memory   = loadUserMemory(userId, persona);
+  const self     = loadSelfMemory(persona);
 
   while (memory.history.length > MAX_HISTORY) memory.history.shift();
 
   // ── Build dynamic system prompt ──────────────────────────────────────────
-  const familiarityLabel             = getFamiliarityLabel(memory.familiarity);
+  const familiarityLabel             = getFamiliarityLabel(memory.familiarity, persona);
   const { timeOfDay, sinceLastSeen } = getTimeContext(memory.lastSeen);
 
-  let systemContent = SYSTEM_PROMPT;
+  let systemContent = persona.systemPrompt;
   systemContent += `\n\nYour relationship with ${username}: ${familiarityLabel}`;
   systemContent += `\n\nTime context: It is currently ${timeOfDay}. ${sinceLastSeen} Let this subtly color your mood and energy -- do not reference it directly or announce it.`;
 
@@ -725,15 +615,15 @@ client.on("messageCreate", async (message) => {
     // ─────────────────────────────────────────────────────────────────────────
 
     Promise.all([
-      extractUserFacts(username, userText, reply, memory.facts),
-      extractSelfFacts(username, userText, reply, self.facts),
+      extractUserFacts(username, userText, reply, memory.facts, persona),
+      extractSelfFacts(username, userText, reply, self.facts, persona),
     ]).then(([userResult, updatedSelfFacts]) => {
       memory.facts        = userResult.facts;
       memory.familiarity += BASE_POINTS;
       if (userResult.newFacts) memory.familiarity += PERSONAL_BONUS;
-      saveUserMemory(userId, memory);
+      saveUserMemory(userId, memory, persona);
       self.facts = updatedSelfFacts;
-      saveSelfMemory(self);
+      saveSelfMemory(self, persona);
     });
 
     if (reply.length <= 2000) {

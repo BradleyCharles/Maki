@@ -27,6 +27,7 @@
   <div id="app" hidden>
     <header id="topbar">
       <span id="topbar-title">Maki</span>
+      <span id="topbar-persona"></span>
       <div id="topbar-right">
         <span id="status-dot" role="status" aria-label="Ollama: checking" title="Ollama connection status"></span>
         <button id="change-user-btn" title="Change user">Change User</button>
@@ -46,6 +47,15 @@
 
       <!-- Diagnostics sidebar -->
       <aside id="sidebar">
+
+        <section class="panel">
+          <h3>Personality</h3>
+          <div class="field">
+            <label>Active Persona</label>
+            <select id="s-personality"></select>
+          </div>
+          <button id="s-apply-personality" class="btn-sm">Switch</button>
+        </section>
 
         <section class="panel">
           <h3>Model</h3>
@@ -114,7 +124,7 @@
             <pre id="d-user-facts" class="memory-pre">—</pre>
           </div>
           <div class="memory-block">
-            <div class="memory-label">Maki Facts</div>
+            <div class="memory-label" id="d-self-facts-label">Persona Facts</div>
             <pre id="d-maki-facts" class="memory-pre">—</pre>
           </div>
           <button id="btn-refresh-memory" class="btn-sm">Refresh</button>

@@ -79,6 +79,18 @@ web_modules/
 .env.production.local
 .env.local
 
+# User conversation memory — per-user files contain private conversation data.
+# Each persona's self-knowledge file ({personaId}.json) and _settings.json are kept.
+personalities/*/memory/*.json
+!personalities/maki/memory/maki.json
+!personalities/yuki/memory/yuki.json
+
+# Legacy memory directory (pre-personality-system files)
+memory/*.json
+!memory/maki.json
+!memory/yuki.json
+!memory/_settings.json
+
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache

@@ -2,6 +2,7 @@
 let username = "";
 let isGenerating = false;
 let settings = {};
+let currentPersonality = "maki";
 
 // ── DOM refs ──────────────────────────────────────────────────────────────────
 const $ = (id) => document.getElementById(id);
@@ -19,6 +20,8 @@ const changeUserBtn  = $("change-user-btn");
 const statusDot      = $("status-dot");
 
 // Sidebar controls
+const sPersonality   = $("s-personality");
+const sApplyPersonality = $("s-apply-personality");
 const sOllamaUrl     = $("s-ollama-url");
 const sModel         = $("s-model");
 const sApplyModel    = $("s-apply-model");
@@ -94,7 +97,12 @@ async function startSession() {
   dUsername.textContent = username;
 
   await loadSettings();
+  await loadPersonalities();
   await loadModels();
+
+  const activeOpt = sPersonality.options[sPersonality.selectedIndex];
+  if (activeOpt) $("topbar-title").textContent = activeOpt.text;
+
   await refreshSessionStats();
   await refreshMemory();
   checkOllamaStatus();
@@ -114,11 +122,43 @@ async function startSession() {
   messageInput.focus();
 }
 
+// ── Personalities ─────────────────────────────────────────────────────────────
+async function loadPersonalities() {
+  try {
+    const res = await fetch("/api/personalities");
+    const list = await res.json();
+    sPersonality.innerHTML = "";
+    for (const p of list) {
+      const opt = document.createElement("option");
+      opt.value = p.id;
+      opt.textContent = p.displayName;
+      if (p.id === currentPersonality) opt.selected = true;
+      sPersonality.appendChild(opt);
+    }
+  } catch {}
+}
+
+sApplyPersonality.addEventListener("click", async () => {
+  const chosen = sPersonality.value;
+  await fetch("/api/settings", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ personality: chosen }),
+  });
+  currentPersonality = chosen;
+  const label = sPersonality.options[sPersonality.selectedIndex]?.text ?? chosen;
+  $("topbar-title").textContent = label;
+  await refreshMemory();
+  await refreshSessionStats();
+  addSystemMsg(`Switched to ${label}.`);
+});
+
 // ── Settings ──────────────────────────────────────────────────────────────────
 async function loadSettings() {
   try {
     const res = await fetch("/api/settings");
     settings = await res.json();
+    if (settings.personality) currentPersonality = settings.personality;
     applySettingsToUI();
   } catch {}
 }
@@ -238,14 +278,17 @@ async function refreshSessionStats() {
 
 async function refreshMemory() {
   try {
-    const [userRes, makiRes] = await Promise.all([
+    const [userRes, selfRes] = await Promise.all([
       fetch(`/api/memory/${encodeURIComponent(username)}`),
-      fetch("/api/memory/maki"),
+      fetch("/api/memory/self"),
     ]);
     const userData = await userRes.json();
-    const makiData = await makiRes.json();
+    const selfData = await selfRes.json();
     dUserFacts.textContent = userData.facts?.trim() || "(none yet)";
-    dMakiFacts.textContent = makiData.facts?.trim() || "(none yet)";
+    dMakiFacts.textContent = selfData.facts?.trim() || "(none yet)";
+    if (selfData.personaName) {
+      $("d-self-facts-label").textContent = `${selfData.personaName} Facts`;
+    }
   } catch {}
 }
 
@@ -484,7 +527,7 @@ function addMakiMessage() {
 
   const lbl = document.createElement("div");
   lbl.className = "msg-label";
-  lbl.textContent = "Maki";
+  lbl.textContent = $("topbar-title").textContent || "Maki";
 
   const bubble = document.createElement("div");
   bubble.className = "msg-bubble";
@@ -502,7 +545,7 @@ function addMakiMessageWithThink() {
 
   const lbl = document.createElement("div");
   lbl.className = "msg-label";
-  lbl.textContent = "Maki";
+  lbl.textContent = $("topbar-title").textContent || "Maki";
 
   const thinkContainer = document.createElement("div");
   thinkContainer.className = "think-block";
@@ -530,7 +573,7 @@ function addTyping() {
 
   const lbl = document.createElement("div");
   lbl.className = "msg-label";
-  lbl.textContent = "Maki";
+  lbl.textContent = $("topbar-title").textContent || "Maki";
 
   const indicator = document.createElement("div");
   indicator.className = "typing-indicator";

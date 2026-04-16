@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MakiLocal</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Name entry overlay -->
+  <div id="name-overlay">
+    <div id="name-box">
+      <h1>MakiLocal</h1>
+      <div id="user-list" hidden>
+        <p class="name-label">Select a user</p>
+        <div id="user-list-items"></div>
+        <div class="name-divider"><span>or</span></div>
+      </div>
+      <p class="name-label">Enter a name</p>
+      <input id="name-input" type="text" placeholder="enter a name" maxlength="64" autocomplete="off" />
+      <button id="name-submit">Start</button>
+    </div>
+  </div>
+
+  <!-- Main app -->
+  <div id="app" hidden>
+    <header id="topbar">
+      <span id="topbar-title">Maki</span>
+      <div id="topbar-right">
+        <span id="status-dot" role="status" aria-label="Ollama: checking" title="Ollama connection status"></span>
+        <button id="change-user-btn" title="Change user">Change User</button>
+        <button id="sidebar-toggle" title="Toggle diagnostics">⚙</button>
+      </div>
+    </header>
+
+    <div id="main">
+      <!-- Chat panel -->
+      <div id="chat-panel">
+        <div id="messages"></div>
+        <div id="input-area">
+          <textarea id="message-input" placeholder="say something" rows="1" maxlength="4000"></textarea>
+          <button id="send-btn">Send</button>
+        </div>
+      </div>
+
+      <!-- Diagnostics sidebar -->
+      <aside id="sidebar">
+
+        <section class="panel">
+          <h3>Model</h3>
+          <div class="field">
+            <label>Ollama URL</label>
+            <input type="text" id="s-ollama-url" />
+          </div>
+          <div class="field">
+            <label>Model</label>
+            <select id="s-model"></select>
+          </div>
+          <button id="s-apply-model" class="btn-sm">Apply</button>
+        </section>
+
+        <section class="panel">
+          <h3>Sampling</h3>
+          <div class="slider-field">
+            <label>Temperature <span id="v-temperature">0.7</span></label>
+            <input type="range" id="s-temperature" min="0" max="2" step="0.05" />
+          </div>
+          <div class="slider-field">
+            <label>Top-P <span id="v-top_p">0.8</span></label>
+            <input type="range" id="s-top_p" min="0" max="1" step="0.05" />
+          </div>
+          <div class="slider-field">
+            <label>Top-K <span id="v-top_k">20</span></label>
+            <input type="range" id="s-top_k" min="1" max="100" step="1" />
+          </div>
+          <div class="slider-field">
+            <label>Repeat Penalty <span id="v-repeat_penalty">1.4</span></label>
+            <input type="range" id="s-repeat_penalty" min="1" max="2" step="0.05" />
+          </div>
+          <div class="slider-field">
+            <label>Max Tokens <span id="v-num_predict">400</span></label>
+            <input type="range" id="s-num_predict" min="50" max="2048" step="50" />
+          </div>
+          <div class="field toggle-field">
+            <label>Show Thinking</label>
+            <input type="checkbox" id="s-show-thinking" />
+          </div>
+          <button id="s-apply-sampling" class="btn-sm">Apply</button>
+        </section>
+
+        <section class="panel">
+          <h3>Session</h3>
+          <div class="stat-row"><span>User</span><span id="d-username">—</span></div>
+          <div class="stat-row"><span>Familiarity</span><span id="d-familiarity">0 pts</span></div>
+          <div class="stat-row"><span>History</span><span id="d-history">0 msgs</span></div>
+          <div class="stat-row"><span>Last seen</span><span id="d-lastseen">never</span></div>
+          <div class="btn-row">
+            <button id="btn-clear-history" class="btn-sm btn-warn">Clear History</button>
+            <button id="btn-clear-memory" class="btn-sm btn-warn">Clear Memory</button>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h3>Last Response</h3>
+          <div class="stat-row"><span>Time</span><span id="d-response-time">—</span></div>
+          <div class="stat-row"><span>Loop</span><span id="d-loop">—</span></div>
+        </section>
+
+        <section class="panel">
+          <h3>Memory Inspector</h3>
+          <div class="memory-block">
+            <div class="memory-label">User Facts</div>
+            <pre id="d-user-facts" class="memory-pre">—</pre>
+          </div>
+          <div class="memory-block">
+            <div class="memory-label">Maki Facts</div>
+            <pre id="d-maki-facts" class="memory-pre">—</pre>
+          </div>
+          <button id="btn-refresh-memory" class="btn-sm">Refresh</button>
+        </section>
+
+      </aside>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,95 +1,53 @@
 {
-  "facts": "- malocus goes to Dennis with their wife\n- malocus's favorite food is Biscuits and Gravy\n- malocus grew up in a small town without an arcade\n- malocus played NES and SNES consoles\n- malocus loves building things\n- malocus wants to build their own arcade cabinet\n- malocus read Ready Player One\n- malocus does not own a screwdriver",
+  "facts": [
+    {
+      "text": "- Playing D&D over Discord",
+      "addedAt": "2026-04-12T21:59:50.249Z",
+      "weight": "recent"
+    }
+  ],
   "history": [
     {
       "role": "user",
-      "content": "malocus: Yes, I can hold it in my hand"
+      "content": "malocus: Hello Maki"
     },
     {
       "role": "assistant",
-      "content": "Is it something made of metal?"
+      "content": "Hey."
     },
     {
       "role": "user",
-      "content": "malocus: Yes, it can be used as a tool"
+      "content": "malocus: How are you today?"
     },
     {
       "role": "assistant",
-      "content": "Is it something you use to cut or shape things?"
+      "content": "Pretty standard. Just wading through the usual tech sludge. You?"
     },
     {
       "role": "user",
-      "content": "malocus: No, it does not have a handle"
+      "content": "malocus: I'm about to play some DnD with my friends over Discord!"
     },
     {
       "role": "assistant",
-      "content": "Is it something that can be used to measure?"
+      "content": "Oh, D&D. That's a whole other kind of system to manage. Are you running anything, or are you just playing? And what kind of mechanics are you using? I always wonder how much of the 'magic' is just really good improv versus actual rule adherence."
     },
     {
       "role": "user",
-      "content": "malocus: No markings or numbers"
+      "content": "malocus: My friend Beetle is going to DM for us"
     },
     {
       "role": "assistant",
-      "content": "Is it something you use to connect things together?"
+      "content": "A DM, huh. So Beetle is handling the environment and the NPCs, then. That's a whole different kind of state management than just following a pre-written adventure path.\n\nDoes Beetle tend to lean more into the procedural stuff—like making sure every corner has a consequence—or is it more narrative, letting the players just wander into weird situations and figuring it out? I'm always curious about how people balance those two things when running a game."
     },
     {
       "role": "user",
-      "content": "malocus: No, you cannot mark or write with it"
+      "content": "malocus: I bit of both. We are following the Tomb of Annihilation campaign"
     },
     {
       "role": "assistant",
-      "content": "Is it something you use to hold things together, like a fastener?"
-    },
-    {
-      "role": "user",
-      "content": "malocus: No, you cannot make things move with it"
-    },
-    {
-      "role": "assistant",
-      "content": "Is it something you use to make things stay in place?"
-    },
-    {
-      "role": "user",
-      "content": "malocus: No, you already asked a similar question"
-    },
-    {
-      "role": "assistant",
-      "content": "Fair enough. Let's try a different angle. Is it something you use to guide or direct something else?"
-    },
-    {
-      "role": "user",
-      "content": "malocus: Nope! It's my cellphone"
-    },
-    {
-      "role": "assistant",
-      "content": "Oh, right. I should have thought of that sooner. You're always on your phone, aren't you?"
-    },
-    {
-      "role": "user",
-      "content": "malocus: I don't own a screwdriver"
-    },
-    {
-      "role": "assistant",
-      "content": "Oh, right. I should have thought of that sooner. You're always on your phone, aren't you?"
-    },
-    {
-      "role": "user",
-      "content": "malocus: You already asked me that"
-    },
-    {
-      "role": "assistant",
-      "content": "Oh, right. I should have thought of that sooner. You're always on your phone, aren't you?"
-    },
-    {
-      "role": "user",
-      "content": "malocus: Maki the game is over"
-    },
-    {
-      "role": "assistant",
-      "content": "Oh, that’s rough. Did you at least get to the end boss?"
+      "content": "Tomb of Annihilation. Right. That's a big one. I remember hearing about that one.\n\nSo, are you guys sticking close to the established adventure structure, or is Beetle letting the players veer off the main path a lot? Because those campaigns usually have such a clear goal, and I'm always interested in how much room there is for players to just... get lost in the weeds of the world without breaking the plot entirely."
     }
   ],
-  "familiarity": 51,
-  "lastSeen": "2026-03-27T22:22:01.620Z"
+  "familiarity": 7,
+  "lastSeen": "2026-04-12T22:01:27.972Z"
 }

@@ -1,26 +1,63 @@
-import { Client, GatewayIntentBits } from "discord.js";
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
-import { join } from "path";
+import express from "express";
+import {
+  readFileSync,
+  writeFileSync,
+  mkdirSync,
+  existsSync,
+  readdirSync,
+} from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 
-// ── Config ────────────────────────────────────────────────────────────────────
-const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
-const CHANNEL_IDS   = process.env.CHANNEL_ID?.split(",").map(id => id.trim()) ?? [];
-const OLLAMA_URL    = process.env.OLLAMA_URL || "http://localhost:11434";
-const MODEL         = process.env.MODEL      || "gemma4:e4b";
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const app = express();
+app.use(express.json());
+app.use(express.static(join(__dirname, "public")));
+
+// ── Constants ─────────────────────────────────────────────────────────────────
 const MEMORY_DIR    = "./memory";
-const SELF_FILE     = "./memory/maki.json";
-const MAX_HISTORY   = 20;
-// ─────────────────────────────────────────────────────────────────────────────
+const SELF_FILE     = join(MEMORY_DIR, "maki.json");
+const SETTINGS_FILE = join(MEMORY_DIR, "_settings.json");
+
+if (!existsSync(MEMORY_DIR)) mkdirSync(MEMORY_DIR);
 
 // ── Model capabilities ────────────────────────────────────────────────────────
 function modelSupportsThinking(model) {
   return model.startsWith("qwen3");
 }
-// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Settings ──────────────────────────────────────────────────────────────────
+function defaultSettings() {
+  return {
+    ollamaUrl:    process.env.OLLAMA_URL || "http://localhost:11434",
+    model:        process.env.MODEL      || "gemma4:e4b",
+    maxHistory:   20,
+    showThinking: false,
+    chatOptions: {
+      num_predict:    400,
+      temperature:    0.7,
+      top_p:          0.8,
+      top_k:          20,
+      min_p:          0,
+      repeat_penalty: 1.4,
+    },
+  };
+}
+
+let settings = defaultSettings();
+if (existsSync(SETTINGS_FILE)) {
+  try {
+    const saved = JSON.parse(readFileSync(SETTINGS_FILE, "utf8"));
+    settings = { ...defaultSettings(), ...saved };
+    settings.chatOptions = { ...defaultSettings().chatOptions, ...saved.chatOptions };
+  } catch {}
+}
+
+function saveSettings() {
+  writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 2));
+}
 
 // ── Familiarity ───────────────────────────────────────────────────────────────
-// Described as relationship states rather than behavioral directives.
-// Gemma reasons through the implications rather than following a checklist.
 const FAMILIARITY_LEVELS = [
   {
     min: 0,
@@ -47,19 +84,6 @@ const FAMILIARITY_LEVELS = [
 const BASE_POINTS    = 1;
 const PERSONAL_BONUS = 2;
 
-// Short display tiers used by commands (separate from the prompt labels above)
-const FAMILIARITY_TIERS = [
-  { threshold: 60, label: "Close" },
-  { threshold: 30, label: "Genuine" },
-  { threshold: 15, label: "Comfortable" },
-  { threshold: 5,  label: "Acquaintance" },
-  { threshold: 0,  label: "New" },
-];
-
-function getFamiliarityTier(score) {
-  return FAMILIARITY_TIERS.find(t => score >= t.threshold)?.label ?? "New";
-}
-
 function getFamiliarityLabel(score) {
   let label = FAMILIARITY_LEVELS[0].label;
   for (const level of FAMILIARITY_LEVELS) {
@@ -67,7 +91,6 @@ function getFamiliarityLabel(score) {
   }
   return label;
 }
-// ─────────────────────────────────────────────────────────────────────────────
 
 // ── Time context ──────────────────────────────────────────────────────────────
 function getTimeContext(lastSeen) {
@@ -101,7 +124,6 @@ function getTimeContext(lastSeen) {
 
   return { timeOfDay, sinceLastSeen };
 }
-// ─────────────────────────────────────────────────────────────────────────────
 
 // ── Prompts ───────────────────────────────────────────────────────────────────
 const SYSTEM_PROMPT = `You are a person in a chat room. You have no obligation to be helpful. You are just here because you feel like it.
@@ -208,21 +230,13 @@ Rules:
 - Do not duplicate facts already in the existing list
 - If nothing qualifies, respond with only: NO_UPDATE
 - Plain text only, no markdown`;
-// ─────────────────────────────────────────────────────────────────────────────
 
 // ── Fact decay system ─────────────────────────────────────────────────────────
-// Facts are stored as objects with text, addedAt timestamp, and weight tier.
-// Weight tiers: core (stable), recent (time-sensitive), stale (expired recent).
-// Recent facts decay to stale after RECENT_TTL_DAYS days.
 const RECENT_TTL_DAYS = 30;
 
-// Parse facts from either the new array format or legacy string format.
-// Legacy migration happens automatically on first load of an old file.
 function parseFacts(facts) {
   if (!facts) return [];
   if (Array.isArray(facts)) return facts;
-
-  // Migrate legacy plain-string format
   return facts
     .split("\n")
     .map(line => line.trim())
@@ -234,7 +248,6 @@ function parseFacts(facts) {
     }));
 }
 
-// Promote recent facts to stale when they exceed the TTL.
 function decayFacts(facts) {
   const now = new Date();
   return facts.map(fact => {
@@ -244,7 +257,6 @@ function decayFacts(facts) {
   });
 }
 
-// Deduplicate, sanitize, and decay a facts array before writing.
 function cleanFacts(facts) {
   if (!facts) return [];
   const parsed  = parseFacts(facts);
@@ -261,8 +273,6 @@ function cleanFacts(facts) {
   });
 }
 
-// Build a string for system prompt injection, grouping by tier.
-// Stale facts are labelled so Maki treats them as possibly outdated.
 function factsToString(facts) {
   if (!facts?.length) return "";
   const core   = facts.filter(f => f.weight === "core").map(f => f.text).join("\n");
@@ -276,7 +286,21 @@ function factsToString(facts) {
   return out.trim();
 }
 
-// Parse extraction output lines into fact objects.
+// Render facts array as a human-readable string for the memory inspector UI.
+// Groups by tier with clear labels.
+function factsToDisplay(facts) {
+  if (!facts?.length) return "(none yet)";
+  const core   = facts.filter(f => f.weight === "core");
+  const recent = facts.filter(f => f.weight === "recent");
+  const stale  = facts.filter(f => f.weight === "stale");
+
+  let out = "";
+  if (core.length)   out += core.map(f => f.text).join("\n") + "\n";
+  if (recent.length) out += "\n[recent]\n" + recent.map(f => f.text).join("\n") + "\n";
+  if (stale.length)  out += "\n[stale]\n" + stale.map(f => f.text).join("\n") + "\n";
+  return out.trim();
+}
+
 function parseExtractedLines(result) {
   return result
     .split("\n")
@@ -288,10 +312,11 @@ function parseExtractedLines(result) {
       weight:  line.match(/\[(core|recent)\]/i)?.[1]?.toLowerCase() ?? "core",
     }));
 }
-// ─────────────────────────────────────────────────────────────────────────────
 
 // ── Memory helpers ────────────────────────────────────────────────────────────
-if (!existsSync(MEMORY_DIR)) mkdirSync(MEMORY_DIR);
+function sanitizeUserId(name) {
+  return name.toLowerCase().trim().replace(/[^a-z0-9_-]/g, "_").slice(0, 64);
+}
 
 function loadUserMemory(userId) {
   const path = join(MEMORY_DIR, `${userId}.json`);
@@ -300,7 +325,6 @@ function loadUserMemory(userId) {
     const data = JSON.parse(readFileSync(path, "utf8"));
     if (typeof data.familiarity !== "number") data.familiarity = 0;
     if (!data.lastSeen) data.lastSeen = null;
-    // Migrate legacy string facts to array on first load
     if (typeof data.facts === "string") data.facts = parseFacts(data.facts);
     if (!Array.isArray(data.facts)) data.facts = [];
     return data;
@@ -309,9 +333,10 @@ function loadUserMemory(userId) {
   }
 }
 
-function saveUserMemory(userId, memory) {
+function saveUserMemory(userId, memory, displayName) {
   memory.facts    = cleanFacts(memory.facts);
   memory.lastSeen = new Date().toISOString();
+  if (displayName && !memory.displayName) memory.displayName = displayName;
   writeFileSync(join(MEMORY_DIR, `${userId}.json`), JSON.stringify(memory, null, 2));
 }
 
@@ -331,7 +356,6 @@ function saveSelfMemory(memory) {
   memory.facts = cleanFacts(memory.facts);
   writeFileSync(SELF_FILE, JSON.stringify(memory, null, 2));
 }
-// ─────────────────────────────────────────────────────────────────────────────
 
 // ── Loop detection ────────────────────────────────────────────────────────────
 function detectLoop(history) {
@@ -355,48 +379,8 @@ function detectLoop(history) {
   });
 }
 
-async function correctLoop(messages, loopedReply) {
-  const correctionMessages = [
-    ...messages,
-    {
-      role: "user",
-      content: `[System note: Your last reply was too similar to something you already said recently. The repeated reply was: "${loopedReply}". Please respond differently. Do not repeat that reply or anything close to it. Pick up the conversation naturally from where it is now.]`,
-    },
-  ];
-  try {
-    return await ollamaChat(correctionMessages);
-  } catch (err) {
-    console.error("Loop correction failed:", err.message);
-    return null;
-  }
-}
-// ─────────────────────────────────────────────────────────────────────────────
-
-// ── Ollama interface ──────────────────────────────────────────────────────────
-async function ollamaChat(messages) {
-  const body = {
-    model:   MODEL,
-    messages,
-    stream:  false,
-    options: {
-      num_predict:    400,
-      temperature:    0.7,
-      top_p:          0.8,
-      top_k:          20,
-      min_p:          0,
-      repeat_penalty: 1.4,
-    },
-  };
-  if (modelSupportsThinking(MODEL)) body.think = false;
-
-  const response = await fetch(`${OLLAMA_URL}/api/chat`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  if (!response.ok) throw new Error(await response.text());
-  const data = await response.json();
-  const raw  = data.message?.content?.trim() ?? "";
+// ── Response cleaner ──────────────────────────────────────────────────────────
+function cleanResponse(raw) {
   return raw
     .replace(/<think>[\s\S]*?<\/think>/gi, "")
     .replace(/[\u0400-\u04FF]+/g, "")
@@ -407,7 +391,139 @@ async function ollamaChat(messages) {
     .replace(/[\uD800-\uDFFF]./g, "")
     .trim();
 }
-// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Ollama interface ──────────────────────────────────────────────────────────
+async function ollamaChat(messages) {
+  const body = {
+    model:   settings.model,
+    messages,
+    stream:  false,
+    options: settings.chatOptions,
+  };
+  if (modelSupportsThinking(settings.model)) body.think = false;
+
+  const response = await fetch(`${settings.ollamaUrl}/api/chat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) throw new Error(await response.text());
+  const data = await response.json();
+  return cleanResponse(data.message?.content?.trim() ?? "");
+}
+
+async function ollamaChatStream(messages, onToken, onThinkToken) {
+  const wantThink = settings.showThinking && modelSupportsThinking(settings.model);
+  const body = {
+    model:   settings.model,
+    messages,
+    stream:  true,
+    options: settings.chatOptions,
+  };
+  if (modelSupportsThinking(settings.model)) body.think = wantThink;
+
+  const response = await fetch(`${settings.ollamaUrl}/api/chat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) throw new Error(await response.text());
+
+  const reader  = response.body.getReader();
+  const decoder = new TextDecoder();
+
+  let fullContent  = "";
+  let fullThinking = "";
+  let inlineBuffer = "";
+  let inThink      = false;
+
+  function feedInline(chunk) {
+    inlineBuffer += chunk;
+    while (inlineBuffer.length > 0) {
+      if (inThink) {
+        const closeIdx = inlineBuffer.indexOf("</think>");
+        if (closeIdx === -1) {
+          const safe = inlineBuffer.length > 8 ? inlineBuffer.slice(0, -8) : "";
+          if (safe) {
+            fullThinking += safe;
+            if (wantThink) onThinkToken?.(safe);
+            inlineBuffer = inlineBuffer.slice(safe.length);
+          }
+          break;
+        } else {
+          const thinking = inlineBuffer.slice(0, closeIdx);
+          fullThinking  += thinking;
+          if (wantThink) onThinkToken?.(thinking);
+          inlineBuffer = inlineBuffer.slice(closeIdx + 8);
+          inThink = false;
+        }
+      } else {
+        const openIdx = inlineBuffer.indexOf("<think>");
+        if (openIdx === -1) {
+          const safe = inlineBuffer.length > 7 ? inlineBuffer.slice(0, -7) : "";
+          if (safe) {
+            fullContent += safe;
+            onToken(safe);
+            inlineBuffer = inlineBuffer.slice(safe.length);
+          }
+          break;
+        } else {
+          if (openIdx > 0) {
+            const content = inlineBuffer.slice(0, openIdx);
+            fullContent  += content;
+            onToken(content);
+          }
+          inlineBuffer = inlineBuffer.slice(openIdx + 7);
+          inThink = true;
+        }
+      }
+    }
+  }
+
+  let remainder = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    const text  = remainder + decoder.decode(value, { stream: true });
+    const lines = text.split("\n");
+    remainder   = lines.pop() ?? "";
+
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      try {
+        const data = JSON.parse(line);
+        if (data.message?.thinking) {
+          fullThinking += data.message.thinking;
+          if (wantThink) onThinkToken?.(data.message.thinking);
+        }
+        if (data.message?.content) feedInline(data.message.content);
+      } catch {}
+    }
+  }
+
+  if (remainder.trim()) {
+    try {
+      const data = JSON.parse(remainder);
+      if (data.message?.thinking) {
+        fullThinking += data.message.thinking;
+        if (wantThink) onThinkToken?.(data.message.thinking);
+      }
+      if (data.message?.content) feedInline(data.message.content);
+    } catch {}
+  }
+
+  if (inlineBuffer) {
+    if (inThink) {
+      fullThinking += inlineBuffer;
+    } else {
+      fullContent += inlineBuffer;
+      onToken(inlineBuffer);
+    }
+  }
+
+  return { content: cleanResponse(fullContent), thinking: fullThinking };
+}
 
 // ── Extraction helpers ────────────────────────────────────────────────────────
 async function extractUserFacts(username, userMessage, botReply, existingFacts) {
@@ -426,8 +542,7 @@ async function extractUserFacts(username, userMessage, botReply, existingFacts) 
     const result = await ollamaChat(messages);
     if (!result || result === "NO_UPDATE") return { facts: existingFacts, newFacts: false };
     const newFacts = parseExtractedLines(result);
-    const merged   = [...(existingFacts || []), ...newFacts];
-    return { facts: merged, newFacts: true };
+    return { facts: [...(existingFacts || []), ...newFacts], newFacts: true };
   } catch (err) {
     console.error("User memory extraction failed:", err.message);
     return { facts: existingFacts, newFacts: false };
@@ -456,218 +571,26 @@ async function extractSelfFacts(username, userMessage, botReply, existingFacts) 
     return existingFacts;
   }
 }
-// ─────────────────────────────────────────────────────────────────────────────
 
-// ── Command handler ───────────────────────────────────────────────────────────
-async function handleCommand(message) {
-  const args    = message.content.trim().split(/\s+/);
-  const command = args[0].toLowerCase();
-  const isAdmin = message.author.id === process.env.ADMIN_ID;
-  const userId  = message.author.id;
+// ── API: Chat ─────────────────────────────────────────────────────────────────
+app.post("/api/chat", async (req, res) => {
+  const { username, message } = req.body;
+  if (!username?.trim() || !message?.trim())
+    return res.status(400).json({ error: "username and message required" });
 
-  switch (command) {
+  const userId = sanitizeUserId(username);
+  const memory = loadUserMemory(userId);
+  const self   = loadSelfMemory();
 
-    // ── !options ──────────────────────────────────────────────────────────────
-    case "!options": {
-      const lines = [
-        "**Available commands:**",
-        "",
-        "`!options` — show this list",
-        "`!familiarity` — see your current familiarity score and relationship tier",
-        "`!facts` — see what Maki knows about you",
-        "`!clearhistory` — wipe your conversation history (facts kept)",
-        "`!resetme` — wipe your history and facts (familiarity kept)",
-        "`!fullreset` — wipe everything, start completely fresh",
-      ];
-      if (isAdmin) {
-        lines.push(
-          "",
-          "**Admin only:**",
-          "`!welcome` — post the welcome message in this channel",
-          "`!inspect @user` — view a user's facts and familiarity score",
-          "`!resetuser @user` — fully reset a user's memory",
-          "`!setfamiliarity @user <score>` — manually set a user's familiarity score",
-        );
-      }
-      await message.channel.send(lines.join("\n"));
-      return true;
-    }
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.flushHeaders();
 
-    // ── !familiarity ──────────────────────────────────────────────────────────
-    case "!familiarity": {
-      const memory = loadUserMemory(userId);
-      const score  = memory.familiarity ?? 0;
-      const tier   = getFamiliarityTier(score);
-      await message.channel.send(`Your familiarity score is **${score}** — tier: **${tier}**`);
-      return true;
-    }
+  const send = (obj) => res.write(`data: ${JSON.stringify(obj)}\n\n`);
 
-    // ── !facts ────────────────────────────────────────────────────────────────
-    case "!facts": {
-      const memory = loadUserMemory(userId);
-      const facts  = memory.facts ?? [];
-      if (facts.length === 0) {
-        await message.channel.send("Nothing stored yet.");
-        return true;
-      }
-      const core   = facts.filter(f => f.weight === "core");
-      const recent = facts.filter(f => f.weight === "recent");
-      const stale  = facts.filter(f => f.weight === "stale");
-      const lines  = ["**What Maki knows about you:**"];
-      if (core.length)   lines.push("", "**Core**",   ...core.map(f => `• ${f.text}`));
-      if (recent.length) lines.push("", "**Recent**", ...recent.map(f => `• ${f.text}`));
-      if (stale.length)  lines.push("", "**Stale** *(may no longer apply)*", ...stale.map(f => `• ${f.text}`));
-      await message.channel.send(lines.join("\n"));
-      return true;
-    }
+  while (memory.history.length > settings.maxHistory) memory.history.shift();
 
-    // ── !clearhistory ─────────────────────────────────────────────────────────
-    case "!clearhistory": {
-      const memory  = loadUserMemory(userId);
-      memory.history = [];
-      saveUserMemory(userId, memory);
-      await message.channel.send("Conversation history cleared. Facts and familiarity are still intact.");
-      return true;
-    }
-
-    // ── !resetme ──────────────────────────────────────────────────────────────
-    case "!resetme": {
-      const memory  = loadUserMemory(userId);
-      memory.history = [];
-      memory.facts   = [];
-      saveUserMemory(userId, memory);
-      await message.channel.send("History and facts cleared. Familiarity score kept.");
-      return true;
-    }
-
-    // ── !fullreset ────────────────────────────────────────────────────────────
-    case "!fullreset": {
-      saveUserMemory(userId, { history: [], facts: [], familiarity: 0, lastSeen: null });
-      await message.channel.send("Full reset done. Clean slate.");
-      return true;
-    }
-
-    // ── !welcome (admin) ──────────────────────────────────────────────────────
-    case "!welcome": {
-      if (!isAdmin) return false;
-      const welcomeMessage = `Hey, welcome. Really -- I'm glad you stopped by.
-
-I'm Maki. I live in the chat channels and I genuinely like talking to people, so don't be shy.
-
-A couple of things worth knowing before you dive in: I remember what you tell me. Not in a creepy way -- more like a friend who actually pays attention. The more we talk, the more I'll feel like someone you know rather than something you're testing. I have a whole thing going on under the hood: moods, opinions, a history I'll share if you ask the right questions. I don't volunteer everything up front, but it's all there.
-
-I'm not trying to be your assistant. I'm just here to have a real conversation. Give me something to work with and I will.
-
-Heads up: this is an active development project. Conversations and usernames may be referenced in documentation or presentations. Wanted to be honest about that from the start.
-
-Want to see how it's built? <YOUR_GITHUB_URL>
-
-Otherwise -- jump in. I don't bite.`;
-      await message.channel.send(welcomeMessage);
-      return true;
-    }
-
-    // ── !inspect (admin) ──────────────────────────────────────────────────────
-    case "!inspect": {
-      if (!isAdmin) return false;
-      const target = message.mentions.users.first();
-      if (!target) {
-        await message.channel.send("Usage: `!inspect @user`");
-        return true;
-      }
-      const memory = loadUserMemory(target.id);
-      const score  = memory.familiarity ?? 0;
-      const tier   = getFamiliarityTier(score);
-      const facts  = memory.facts ?? [];
-      const core   = facts.filter(f => f.weight === "core");
-      const recent = facts.filter(f => f.weight === "recent");
-      const stale  = facts.filter(f => f.weight === "stale");
-      const lines  = [
-        `**Memory report for ${target.username}**`,
-        `Familiarity: **${score}** (${tier})`,
-        `History entries: **${(memory.history ?? []).length}**`,
-      ];
-      if (core.length)   lines.push("", "**Core facts**",   ...core.map(f => `• ${f.text}`));
-      if (recent.length) lines.push("", "**Recent facts**", ...recent.map(f => `• ${f.text}`));
-      if (stale.length)  lines.push("", "**Stale facts**",  ...stale.map(f => `• ${f.text}`));
-      if (facts.length === 0) lines.push("", "No facts stored yet.");
-      await message.channel.send(lines.join("\n"));
-      return true;
-    }
-
-    // ── !resetuser (admin) ────────────────────────────────────────────────────
-    case "!resetuser": {
-      if (!isAdmin) return false;
-      const target = message.mentions.users.first();
-      if (!target) {
-        await message.channel.send("Usage: `!resetuser @user`");
-        return true;
-      }
-      saveUserMemory(target.id, { history: [], facts: [], familiarity: 0, lastSeen: null });
-      await message.channel.send(`Memory reset for ${target.username}.`);
-      return true;
-    }
-
-    // ── !setfamiliarity (admin) ───────────────────────────────────────────────
-    case "!setfamiliarity": {
-      if (!isAdmin) return false;
-      const target = message.mentions.users.first();
-      const score  = parseInt(args[2]);
-      if (!target || isNaN(score)) {
-        await message.channel.send("Usage: `!setfamiliarity @user <score>`");
-        return true;
-      }
-      const memory      = loadUserMemory(target.id);
-      memory.familiarity = score;
-      saveUserMemory(target.id, memory);
-      await message.channel.send(`Familiarity for ${target.username} set to **${score}** (${getFamiliarityTier(score)}).`);
-      return true;
-    }
-
-    default:
-      return false;
-  }
-}
-// ─────────────────────────────────────────────────────────────────────────────
-
-// ── Discord client ────────────────────────────────────────────────────────────
-const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-  ],
-});
-
-client.once("clientReady", () => {
-  console.log(`Logged in as ${client.user.tag}`);
-  console.log(`Watching channels: ${CHANNEL_IDS.join(", ")}`);
-  console.log(`Using model: ${MODEL} at ${OLLAMA_URL}`);
-  console.log(`Thinking mode: ${modelSupportsThinking(MODEL) ? "supported" : "not supported (omitted)"}`);
-});
-
-client.on("messageCreate", async (message) => {
-  if (message.author.bot) return;
-  if (!CHANNEL_IDS.includes(message.channel.id)) return;
-
-  const userText = message.content.trim();
-  if (!userText) return;
-
-  if (userText.startsWith("!")) {
-    const handled = await handleCommand(message);
-    if (handled) return;
-  }
-
-  await message.channel.sendTyping();
-
-  const userId   = message.author.id;
-  const username = message.author.username;
-  const memory   = loadUserMemory(userId);
-  const self     = loadSelfMemory();
-
-  while (memory.history.length > MAX_HISTORY) memory.history.shift();
-
-  // ── Build dynamic system prompt ──────────────────────────────────────────
   const familiarityLabel             = getFamiliarityLabel(memory.familiarity);
   const { timeOfDay, sinceLastSeen } = getTimeContext(memory.lastSeen);
 
@@ -684,60 +607,200 @@ client.on("messageCreate", async (message) => {
   if (userStr) {
     systemContent += `\n\nWhat you remember about ${username}:\n${userStr}`;
   }
-  // ─────────────────────────────────────────────────────────────────────────
 
-  memory.history.push({ role: "user", content: `${username}: ${userText}` });
+  memory.history.push({ role: "user", content: `${username}: ${message}` });
+  const messages = [{ role: "system", content: systemContent }, ...memory.history];
 
-  const messages = [
-    { role: "system", content: systemContent },
-    ...memory.history,
-  ];
+  const startTime = Date.now();
 
   try {
-    let reply = await ollamaChat(messages);
+    const { content } = await ollamaChatStream(
+      messages,
+      (token) => send({ type: "token", content: token }),
+      (token) => send({ type: "think", content: token })
+    );
+
+    let reply = content;
 
     if (!reply) {
-      await message.reply("...");
+      send({ type: "done", reply: "...", responseTime: Date.now() - startTime, loopDetected: false, loopCorrected: false, familiarity: memory.familiarity, historyCount: memory.history.length });
+      res.end();
       return;
     }
 
-    // ── Loop detection and self-correction ──────────────────────────────────
     memory.history.push({ role: "assistant", content: reply });
 
+    let loopDetected  = false;
+    let loopCorrected = false;
+
     if (detectLoop(memory.history)) {
-      console.log(`[Loop detected] Attempting self-correction for ${username}`);
+      loopDetected = true;
       memory.history.pop();
-      const corrected = await correctLoop(messages, reply);
-      if (corrected) {
-        reply = corrected;
-        console.log(`[Loop corrected] New reply generated`);
+      send({ type: "loop_detected" });
+      console.log(`[Loop detected] Attempting self-correction for ${username}`);
+      try {
+        const corrected = await ollamaChat([
+          ...messages,
+          {
+            role: "user",
+            content: `[System note: Your last reply was too similar to something you already said recently. The repeated reply was: "${reply}". Please respond differently. Do not repeat that reply or anything close to it. Pick up the conversation naturally from where it is now.]`,
+          },
+        ]);
+        if (corrected) {
+          reply         = corrected;
+          loopCorrected = true;
+          send({ type: "correction", content: reply });
+          console.log(`[Loop corrected] New reply generated`);
+        }
+      } catch (err) {
+        console.error("Loop correction failed:", err.message);
       }
       memory.history.push({ role: "assistant", content: reply });
     }
-    // ─────────────────────────────────────────────────────────────────────────
 
     Promise.all([
-      extractUserFacts(username, userText, reply, memory.facts),
-      extractSelfFacts(username, userText, reply, self.facts),
+      extractUserFacts(username, message, reply, memory.facts),
+      extractSelfFacts(username, message, reply, self.facts),
     ]).then(([userResult, updatedSelfFacts]) => {
       memory.facts        = userResult.facts;
       memory.familiarity += BASE_POINTS;
       if (userResult.newFacts) memory.familiarity += PERSONAL_BONUS;
-      saveUserMemory(userId, memory);
+      saveUserMemory(userId, memory, username);
       self.facts = updatedSelfFacts;
       saveSelfMemory(self);
     });
 
-    if (reply.length <= 2000) {
-      await message.reply(reply);
-    } else {
-      const chunks = reply.match(/[\s\S]{1,2000}/g) || [];
-      for (const chunk of chunks) await message.channel.send(chunk);
-    }
+    send({ type: "done", reply, responseTime: Date.now() - startTime, loopDetected, loopCorrected, familiarity: memory.familiarity, historyCount: memory.history.length });
+    res.end();
   } catch (err) {
-    console.error("Error:", err.message);
-    await message.reply("Something broke. Is Ollama still running?");
+    console.error("Chat error:", err.message);
+    send({ type: "error", message: err.message });
+    res.end();
   }
 });
 
-client.login(DISCORD_TOKEN);
+// ── API: Users ────────────────────────────────────────────────────────────────
+app.get("/api/users", (req, res) => {
+  try {
+    const excluded = new Set(["maki.json", "_settings.json"]);
+    const users = readdirSync(MEMORY_DIR)
+      .filter(f => f.endsWith(".json") && !excluded.has(f))
+      .map(f => {
+        const userId = f.slice(0, -5);
+        try {
+          const data = JSON.parse(readFileSync(join(MEMORY_DIR, f), "utf8"));
+          return { userId, displayName: data.displayName || userId, familiarity: data.familiarity ?? 0, lastSeen: data.lastSeen ?? null };
+        } catch {
+          return { userId, displayName: userId, familiarity: 0, lastSeen: null };
+        }
+      })
+      .sort((a, b) => (b.lastSeen ?? "").localeCompare(a.lastSeen ?? ""));
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── API: Models ───────────────────────────────────────────────────────────────
+app.get("/api/models", async (req, res) => {
+  try {
+    const response = await fetch(`${settings.ollamaUrl}/api/tags`);
+    if (!response.ok) throw new Error("Ollama unreachable");
+    const data = await response.json();
+    res.json((data.models ?? []).map(m => m.name));
+  } catch (err) {
+    res.status(503).json({ error: err.message });
+  }
+});
+
+// ── API: Settings ─────────────────────────────────────────────────────────────
+app.get("/api/settings", (req, res) => res.json(settings));
+
+app.post("/api/settings", (req, res) => {
+  const { chatOptions, ...rest } = req.body;
+  Object.assign(settings, rest);
+  if (chatOptions) Object.assign(settings.chatOptions, chatOptions);
+  saveSettings();
+  res.json(settings);
+});
+
+// ── API: Memory ───────────────────────────────────────────────────────────────
+app.get("/api/memory/maki", (req, res) => {
+  const m = loadSelfMemory();
+  res.json({ facts: factsToDisplay(m.facts) });
+});
+
+app.get("/api/memory/:userId", (req, res) => {
+  const userId = sanitizeUserId(req.params.userId);
+  const m      = loadUserMemory(userId);
+  res.json({
+    facts:        factsToDisplay(m.facts),
+    familiarity:  m.familiarity,
+    historyCount: m.history.length,
+    lastSeen:     m.lastSeen,
+  });
+});
+
+app.delete("/api/memory/:userId/history", (req, res) => {
+  const userId = sanitizeUserId(req.params.userId);
+  const m      = loadUserMemory(userId);
+  m.history    = [];
+  saveUserMemory(userId, m);
+  res.json({ ok: true, message: "Conversation history cleared." });
+});
+
+app.delete("/api/memory/:userId", (req, res) => {
+  const userId = sanitizeUserId(req.params.userId);
+  writeFileSync(
+    join(MEMORY_DIR, `${userId}.json`),
+    JSON.stringify({ facts: [], history: [], familiarity: 0, lastSeen: null }, null, 2)
+  );
+  res.json({ ok: true, message: "User memory cleared." });
+});
+
+// ── API: Presence notes ───────────────────────────────────────────────────────
+app.post("/api/memory/:userId/note", (req, res) => {
+  const userId             = sanitizeUserId(req.params.userId);
+  const { type, username } = req.body;
+  if (!type || !username) return res.status(400).json({ error: "type and username required" });
+
+  const memory = loadUserMemory(userId);
+  if (!memory.history.length) return res.json({ ok: true, skipped: true });
+
+  if (type === "leave") {
+    const formatted = new Date().toLocaleString("en-US", { weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit", hour12: true });
+    memory.history.push({ role: "user", content: `[${username} left — ${formatted}]` });
+    saveUserMemory(userId, memory, username);
+    return res.json({ ok: true });
+  }
+
+  if (type === "return") {
+    const lastSeen = memory.lastSeen ? new Date(memory.lastSeen) : null;
+    if (!lastSeen) return res.json({ ok: true, skipped: true });
+
+    const diffMs    = Date.now() - lastSeen.getTime();
+    const diffMins  = Math.floor(diffMs / 60000);
+    if (diffMins < 1) return res.json({ ok: true, skipped: true });
+
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays  = Math.floor(diffHours / 24);
+    const duration  =
+      diffDays  >= 1 ? `${diffDays} day${diffDays !== 1 ? "s" : ""}` :
+      diffHours >= 1 ? `${diffHours} hour${diffHours !== 1 ? "s" : ""}` :
+                       `${diffMins} minute${diffMins !== 1 ? "s" : ""}`;
+
+    memory.history.push({ role: "user", content: `[${username} came back — ${duration} later]` });
+    saveUserMemory(userId, memory, username);
+    return res.json({ ok: true, duration });
+  }
+
+  res.status(400).json({ error: "type must be leave or return" });
+});
+
+// ── Start ─────────────────────────────────────────────────────────────────────
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`MakiLocal running at http://localhost:${PORT}`);
+  console.log(`Model: ${settings.model} | Ollama: ${settings.ollamaUrl}`);
+  console.log(`Thinking mode: ${modelSupportsThinking(settings.model) ? "supported" : "not supported (omitted)"}`);
+});

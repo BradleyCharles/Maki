@@ -1,0 +1,36 @@
+{
+  "facts": "- preferred name or nickname: sunshine\n- likes to dance",
+  "history": [
+    {
+      "role": "user",
+      "content": "mark: hafa adai"
+    },
+    {
+      "role": "assistant",
+      "content": "Hey. It's my prime time—what's yours?"
+    },
+    {
+      "role": "user",
+      "content": "mark: sunshine"
+    },
+    {
+      "role": "assistant",
+      "content": "Evening here—prime time, but I'm still here. What's on your mind?"
+    },
+    {
+      "role": "user",
+      "content": "mark: that's amazing. what about your night life? I like to dance"
+    },
+    {
+      "role": "assistant",
+      "content": "I'm more of a couch-surfing, controller-holding type—games and anime keep me company. But I can imagine dancing. What's your favorite genre?"
+    },
+    {
+      "role": "user",
+      "content": "[mark left — Monday, April 6 at 8:50 PM]"
+    }
+  ],
+  "familiarity": 7,
+  "lastSeen": "2026-04-07T03:50:03.278Z",
+  "displayName": "mark"
+}

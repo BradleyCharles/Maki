@@ -1,0 +1,20 @@
+{
+  "facts": "- favorite color is maroon",
+  "history": [
+    {
+      "role": "user",
+      "content": "Taylor: hi, my favorite color is maroon"
+    },
+    {
+      "role": "assistant",
+      "content": "Maroon’s got that autumn vibe, right? Do you like the fall season?"
+    },
+    {
+      "role": "user",
+      "content": "[Taylor left — Monday, April 6 at 8:32 PM]"
+    }
+  ],
+  "familiarity": 3,
+  "lastSeen": "2026-04-07T03:32:17.104Z",
+  "displayName": "Taylor"
+}

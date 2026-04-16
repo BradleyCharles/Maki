@@ -4,7 +4,7 @@ A Discord bot with a persistent persona, powered by a local [Ollama](https://oll
 
 ## What it does
 
-Maki runs as a person in a Discord channel — not an assistant, just someone who happens to be there. She has a detailed backstory (35, Tokyo → Seattle, tech infrastructure, dry humor, gamer), genuine curiosity, and opinions. She is not designed to be helpful; conversations just sometimes go that way.
+Maki runs as a person in a Discord channel — She has a detailed backstory (35, Tokyo → Seattle, tech infrastructure, dry humor, gamer), genuine curiosity, and opinions. She is not designed to be helpful; but engage in conversation. 
 
 Beyond the persona, the interesting parts are the systems underneath:
 
@@ -18,70 +18,6 @@ The project has two independent entry points:
 
 - **bot.js** — Discord bot only, no web interface
 - **server.js** — Express server with a web chat UI and REST API, plus the Discord bot integrated
-
-## Requirements
-
-- [Node.js](https://nodejs.org) v18+
-- [Ollama](https://ollama.com) running locally with a model pulled
-- A Discord bot token with **Message Content Intent** enabled
-
-## Setup
-
-**1. Clone and install dependencies**
-
-```bash
-git clone https://github.com/your-username/maki.git
-cd maki
-npm install
-```
-
-**2. Pull a model in Ollama**
-
-```bash
-ollama pull qwen3:8b
-# or
-ollama pull gemma4:e4b
-```
-
-Any chat model will work. Models with extended thinking (like qwen3) handle the background extraction passes well. The default model for `server.js` is `gemma4:e4b`; the default for `bot.js` is `qwen3:8b`.
-
-**3. Create a Discord bot**
-
-- Go to the [Discord Developer Portal](https://discord.com/developers/applications)
-- Create a new application and add a Bot
-- Under **Privileged Gateway Intents**, enable **Message Content Intent**
-- Copy the bot token
-- Invite the bot to your server with the `bot` scope and `Send Messages` / `Read Message History` permissions
-
-**4. Configure environment variables**
-
-Copy `.env.example` to `.env` and fill in the values:
-
-```bash
-cp .env.example .env
-```
-
-| Variable | Required | Default | Description |
-|---|---|---|---|
-| `DISCORD_TOKEN` | yes | — | Your Discord bot token |
-| `CHANNEL_ID` | yes | — | Channel ID(s) Maki listens in (comma-separated for multiple) |
-| `OLLAMA_URL` | no | `http://localhost:11434` | Ollama API base URL |
-| `MODEL` | no | `qwen3:8b` / `gemma4:e4b` | Ollama model name |
-| `ADMIN_ID` | no | — | Discord user ID for admin commands |
-
-To get a channel ID: enable Developer Mode in Discord settings, then right-click a channel and select **Copy Channel ID**.
-
-## Running
-
-```bash
-# Discord bot only (bot.js)
-npm start
-
-# Development with auto-restart (server.js + web UI)
-npm run dev
-```
-
-The web UI is served at `http://localhost:3000` when running `server.js`.
 
 ## Bot commands
 
@@ -136,3 +72,69 @@ This is a learning project. The things I am interested in:
 - Prompt design for extraction tasks (pulling structured facts from unstructured conversation)
 - How familiarity and relationship framing change the feel of responses
 - The practical limits of local models for this kind of work
+
+---
+
+## Building Maki yourself
+
+### Requirements
+
+- [Node.js](https://nodejs.org) v18+
+- [Ollama](https://ollama.com) running locally with a model pulled
+- A Discord bot token with **Message Content Intent** enabled
+
+### Setup
+
+**1. Clone and install dependencies**
+
+```bash
+git clone https://github.com/BradleyCharles/Maki
+cd maki
+npm install
+```
+
+**2. Pull a model in Ollama**
+
+```bash
+ollama pull gemma4:e4b
+```
+
+Any chat model will work. Models with extended thinking (like qwen3) handle the background extraction passes well. The default model for both entry points is `gemma4:e4b`.
+
+**3. Create a Discord bot**
+
+- Go to the [Discord Developer Portal](https://discord.com/developers/applications)
+- Create a new application and add a Bot
+- Under **Privileged Gateway Intents**, enable **Message Content Intent**
+- Copy the bot token
+- Invite the bot to your server with the `bot` scope and `Send Messages` / `Read Message History` permissions
+
+**4. Configure environment variables**
+
+Copy `.env.example` to `.env` and fill in the values:
+
+```bash
+cp .env.example .env
+```
+
+| Variable | Required | Default | Description |
+|---|---|---|---|
+| `DISCORD_TOKEN` | yes | — | Your Discord bot token |
+| `CHANNEL_ID` | yes | — | Channel ID(s) Maki listens in (comma-separated for multiple) |
+| `OLLAMA_URL` | no | `http://localhost:11434` | Ollama API base URL |
+| `MODEL` | no | `gemma4:e4b` | Ollama model name |
+| `ADMIN_ID` | no | — | Discord user ID for admin commands |
+
+To get a channel ID: enable Developer Mode in Discord settings, then right-click a channel and select **Copy Channel ID**.
+
+### Running
+
+```bash
+# Discord bot only (bot.js)
+npm start
+
+# Development with auto-restart (server.js + web UI)
+npm run dev
+```
+
+The web UI is served at `http://localhost:3000` when running `server.js`.

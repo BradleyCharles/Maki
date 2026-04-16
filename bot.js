@@ -654,8 +654,16 @@ client.on("messageCreate", async (message) => {
   if (!userText) return;
 
   if (userText.startsWith("!")) {
-    const handled = await handleCommand(message);
-    if (handled) return;
+    try {
+      const handled = await handleCommand(message);
+      if (handled) return;
+    } catch (err) {
+      if (err.code === 50013) {
+        console.error(`Missing Permissions in channel ${message.channel.id} — skipping`);
+        return;
+      }
+      throw err;
+    }
   }
 
   await message.channel.sendTyping();
@@ -735,8 +743,12 @@ client.on("messageCreate", async (message) => {
       for (const chunk of chunks) await message.channel.send(chunk);
     }
   } catch (err) {
+    if (err.code === 50013) {
+      console.error(`Missing Permissions in channel ${message.channel.id} — skipping`);
+      return;
+    }
     console.error("Error:", err.message);
-    await message.reply("Something broke. Is Ollama still running?");
+    try { await message.reply("Something broke. Is Ollama still running?"); } catch {}
   }
 });
 

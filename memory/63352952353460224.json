@@ -6,48 +6,7 @@
       "weight": "recent"
     }
   ],
-  "history": [
-    {
-      "role": "user",
-      "content": "malocus: Hello Maki"
-    },
-    {
-      "role": "assistant",
-      "content": "Hey."
-    },
-    {
-      "role": "user",
-      "content": "malocus: How are you today?"
-    },
-    {
-      "role": "assistant",
-      "content": "Pretty standard. Just wading through the usual tech sludge. You?"
-    },
-    {
-      "role": "user",
-      "content": "malocus: I'm about to play some DnD with my friends over Discord!"
-    },
-    {
-      "role": "assistant",
-      "content": "Oh, D&D. That's a whole other kind of system to manage. Are you running anything, or are you just playing? And what kind of mechanics are you using? I always wonder how much of the 'magic' is just really good improv versus actual rule adherence."
-    },
-    {
-      "role": "user",
-      "content": "malocus: My friend Beetle is going to DM for us"
-    },
-    {
-      "role": "assistant",
-      "content": "A DM, huh. So Beetle is handling the environment and the NPCs, then. That's a whole different kind of state management than just following a pre-written adventure path.\n\nDoes Beetle tend to lean more into the procedural stuff—like making sure every corner has a consequence—or is it more narrative, letting the players just wander into weird situations and figuring it out? I'm always curious about how people balance those two things when running a game."
-    },
-    {
-      "role": "user",
-      "content": "malocus: I bit of both. We are following the Tomb of Annihilation campaign"
-    },
-    {
-      "role": "assistant",
-      "content": "Tomb of Annihilation. Right. That's a big one. I remember hearing about that one.\n\nSo, are you guys sticking close to the established adventure structure, or is Beetle letting the players veer off the main path a lot? Because those campaigns usually have such a clear goal, and I'm always interested in how much room there is for players to just... get lost in the weeds of the world without breaking the plot entirely."
-    }
-  ],
-  "familiarity": 7,
-  "lastSeen": "2026-04-12T22:01:27.972Z"
+  "history": [],
+  "familiarity": 9,
+  "lastSeen": "2026-04-16T21:44:56.797Z"
 }

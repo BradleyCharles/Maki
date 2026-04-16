@@ -4,20 +4,25 @@ A Discord bot with a persistent persona, powered by a local [Ollama](https://oll
 
 ## What it does
 
-Maki runs as a person in a Discord channel — not an assistant, just someone who happens to be there. She has a detailed backstory, dry humor, and genuine curiosity. She is not designed to be helpful; conversations just sometimes go that way.
+Maki runs as a person in a Discord channel — not an assistant, just someone who happens to be there. She has a detailed backstory (35, Tokyo → Seattle, tech infrastructure, dry humor, gamer), genuine curiosity, and opinions. She is not designed to be helpful; conversations just sometimes go that way.
 
 Beyond the persona, the interesting parts are the systems underneath:
 
 - **Per-user memory** — after each exchange, a separate extraction pass pulls facts the user stated about themselves and stores them to disk. Maki remembers names, interests, and details across sessions.
-- **Self-memory** — Maki also accumulates a record of what she has revealed about herself through conversation. This feeds back into future prompts, letting her identity develop organically rather than being fully pre-written.
-- **Familiarity system** — each user has a numeric familiarity score. The score increases with every exchange (and faster when personal facts emerge). The score maps to a relationship label that shapes how Maki responds — measured with strangers, more open with people she knows well.
-- **Time-of-day context** — the current time of day is injected as ambient context. Late night Maki is a little different from midday Maki.
-- **Loop detection** — if Maki starts repeating herself across recent replies, a self-correction pass fires automatically and generates a fresh response.
+- **Self-memory** — Maki also accumulates a record of what she has revealed about herself through conversation. This feeds back into future prompts, letting her identity develop organically.
+- **Familiarity system** — each user has a numeric score that increases with every exchange (faster when personal facts emerge). The score maps to a relationship tier (Stranger → Acquaintance → Comfortable → Genuine → Close) that shapes how Maki responds.
+- **Time-of-day context** — current time is injected as ambient context. Late night Maki is different from midday Maki.
+- **Loop detection** — if recent replies are >80% similar, a self-correction pass fires automatically and generates a fresh response.
+
+The project has two independent entry points:
+
+- **bot.js** — Discord bot only, no web interface
+- **server.js** — Express server with a web chat UI and REST API, plus the Discord bot integrated
 
 ## Requirements
 
 - [Node.js](https://nodejs.org) v18+
-- [Ollama](https://ollama.com) running locally with a model pulled (default: `qwen3:8b`)
+- [Ollama](https://ollama.com) running locally with a model pulled
 - A Discord bot token with **Message Content Intent** enabled
 
 ## Setup
@@ -34,47 +39,91 @@ npm install
 
 ```bash
 ollama pull qwen3:8b
+# or
+ollama pull gemma4:e4b
 ```
 
-Any chat model will work. Models with extended thinking (like qwen3) are used for the background extraction passes.
+Any chat model will work. Models with extended thinking (like qwen3) handle the background extraction passes well. The default model for `server.js` is `gemma4:e4b`; the default for `bot.js` is `qwen3:8b`.
 
 **3. Create a Discord bot**
 
 - Go to the [Discord Developer Portal](https://discord.com/developers/applications)
-- Create a new application, add a Bot
+- Create a new application and add a Bot
 - Under **Privileged Gateway Intents**, enable **Message Content Intent**
 - Copy the bot token
 - Invite the bot to your server with the `bot` scope and `Send Messages` / `Read Message History` permissions
 
 **4. Configure environment variables**
 
-Create a `.env` file or set these in your shell:
+Copy `.env.example` to `.env` and fill in the values:
+
+```bash
+cp .env.example .env
+```
 
 | Variable | Required | Default | Description |
 |---|---|---|---|
 | `DISCORD_TOKEN` | yes | — | Your Discord bot token |
 | `CHANNEL_ID` | yes | — | Channel ID(s) Maki listens in (comma-separated for multiple) |
 | `OLLAMA_URL` | no | `http://localhost:11434` | Ollama API base URL |
-| `MODEL` | no | `qwen3:8b` | Ollama model name |
+| `MODEL` | no | `qwen3:8b` / `gemma4:e4b` | Ollama model name |
+| `ADMIN_ID` | no | — | Discord user ID for admin commands |
 
 To get a channel ID: enable Developer Mode in Discord settings, then right-click a channel and select **Copy Channel ID**.
 
 ## Running
 
 ```bash
-# Production
+# Discord bot only (bot.js)
 npm start
 
-# Development (auto-restarts on file changes, ignores memory/)
+# Development with auto-restart (server.js + web UI)
 npm run dev
 ```
 
+The web UI is served at `http://localhost:3000` when running `server.js`.
+
+## Bot commands
+
+Commands available in Discord:
+
+| Command | Description |
+|---|---|
+| `!options` | List available commands |
+| `!familiarity` | Show your familiarity score and relationship tier |
+| `!facts` | See what Maki knows about you |
+| `!clearhistory` | Wipe conversation history (facts kept) |
+| `!resetme` | Wipe history and facts (familiarity kept) |
+| `!fullreset` | Complete reset |
+
+Admin commands (requires `ADMIN_ID` set):
+
+| Command | Description |
+|---|---|
+| `!inspect @user` | View a user's memory and familiarity |
+| `!resetuser @user` | Reset a user's memory |
+| `!setfamiliarity @user <score>` | Manually set a familiarity score |
+
+## Web UI
+
+Running `server.js` also serves a browser-based chat interface with a diagnostics sidebar:
+
+- Chat panel for sending and receiving messages
+- Model selection and Ollama URL configuration
+- Sampling controls (temperature, top-p, top-k, repeat penalty, max tokens)
+- Session stats (familiarity, history size, last seen, response time, loop detection status)
+- Memory inspector showing user and Maki facts with decay tier labels
+- Buttons to clear history or reset memory
+
+Settings adjusted in the web UI are saved to `memory/_settings.json` and persist across restarts.
+
 ## Memory files
 
-Maki stores memory in the `./memory/` directory:
+Maki stores state in the `./memory/` directory:
 
 - `memory/<discord-user-id>.json` — per-user facts, conversation history, familiarity score, and last-seen timestamp
 - `memory/maki.json` — Maki's accumulated self-knowledge
+- `memory/_settings.json` — server-wide model and sampling settings
 
 These are plain JSON files. You can inspect, edit, or delete them freely. Deleting a user file resets Maki's memory of that person entirely.
 

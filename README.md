@@ -81,7 +81,6 @@ This is a learning project. The things I am interested in:
 
 - [Node.js](https://nodejs.org) v18+
 - [Ollama](https://ollama.com) running locally with a model pulled
-- A Discord bot token with **Message Content Intent** enabled
 
 ### Setup
 
@@ -101,7 +100,25 @@ ollama pull gemma4:e4b
 
 Any chat model will work. Models with extended thinking (like qwen3) handle the background extraction passes well. The default model for both entry points is `gemma4:e4b`.
 
-**3. Create a Discord bot**
+---
+
+### Option A — Run offline with the web UI
+
+No Discord bot required. This is the fastest way to test Maki locally.
+
+```bash
+npm run dev
+```
+
+Open `http://localhost:3000` in your browser. You can chat with Maki, inspect memory, and adjust model settings from the diagnostics sidebar. No `.env` file needed.
+
+---
+
+### Option B — Run as a Discord bot
+
+Requires a Discord bot token and a server to add it to.
+
+**1. Create a Discord bot**
 
 - Go to the [Discord Developer Portal](https://discord.com/developers/applications)
 - Create a new application and add a Bot
@@ -109,7 +126,7 @@ Any chat model will work. Models with extended thinking (like qwen3) handle the 
 - Copy the bot token
 - Invite the bot to your server with the `bot` scope and `Send Messages` / `Read Message History` permissions
 
-**4. Configure environment variables**
+**2. Configure environment variables**
 
 Copy `.env.example` to `.env` and fill in the values:
 
@@ -127,14 +144,8 @@ cp .env.example .env
 
 To get a channel ID: enable Developer Mode in Discord settings, then right-click a channel and select **Copy Channel ID**.
 
-### Running
+**3. Start the bot**
 
 ```bash
-# Discord bot only (bot.js)
 npm start
-
-# Development with auto-restart (server.js + web UI)
-npm run dev
 ```
-
-The web UI is served at `http://localhost:3000` when running `server.js`.

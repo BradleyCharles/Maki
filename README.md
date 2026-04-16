@@ -17,7 +17,7 @@ Beyond the persona, the interesting parts are the systems underneath:
 The project has two independent entry points:
 
 - **bot.js** — Discord bot only, no web interface
-- **server.js** — Express server with a web chat UI and REST API, plus the Discord bot integrated
+- **server.js** — Express server with a web chat UI and REST API
 
 ## Bot commands
 
@@ -102,15 +102,26 @@ Any chat model will work. Models with extended thinking (like qwen3) handle the 
 
 ---
 
+### Start scripts
+
+| Command | What it runs |
+|---|---|
+| `npm start` | Both the web server and the Discord bot |
+| `npm run server` | Web server only (offline testing, no Discord required) |
+| `npm run bot` | Discord bot only |
+| `npm run dev` | Web server with nodemon (auto-restart on changes) |
+
+---
+
 ### Option A — Run offline with the web UI
 
-No Discord bot required. This is the fastest way to test Maki locally.
+No Discord bot or `.env` file required. This is the fastest way to test Maki locally.
 
 ```bash
-npm run dev
+npm run server
 ```
 
-Open `http://localhost:3000` in your browser. You can chat with Maki, inspect memory, and adjust model settings from the diagnostics sidebar. No `.env` file needed.
+Open `http://localhost:3000` in your browser. You can chat with Maki, inspect memory, and adjust model settings from the diagnostics sidebar.
 
 ---
 
@@ -144,8 +155,9 @@ cp .env.example .env
 
 To get a channel ID: enable Developer Mode in Discord settings, then right-click a channel and select **Copy Channel ID**.
 
-**3. Start the bot**
+**3. Start**
 
 ```bash
-npm start
+npm run bot        # Discord bot only
+npm start          # Discord bot + web UI together
 ```

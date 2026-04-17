@@ -4,7 +4,7 @@
   "maxHistory": 20,
   "showThinking": true,
   "chatOptions": {
-    "num_predict": 400,
+    "num_predict": 500,
     "temperature": 0.7,
     "top_p": 0.8,
     "top_k": 20,

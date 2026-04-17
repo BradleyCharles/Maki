@@ -19,8 +19,11 @@ const CHANNEL_PERSONALITIES = Object.fromEntries(
     .filter(([c, p]) => c && p)
 );
 
+// Fallback for channels not listed in CHANNEL_PERSONALITIES
+const DEFAULT_PERSONALITY = process.env.DEFAULT_PERSONALITY ?? defaultPersona.id;
+
 function getPersonaForChannel(channelId) {
-  const personaId = CHANNEL_PERSONALITIES[channelId] ?? defaultPersona.id;
+  const personaId = CHANNEL_PERSONALITIES[channelId] ?? DEFAULT_PERSONALITY;
   return personaMap[personaId] ?? defaultPersona;
 }
 // ─────────────────────────────────────────────────────────────────────────────

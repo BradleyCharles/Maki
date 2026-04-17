@@ -1,1 +1,74 @@
-{ "facts": [] }
+{
+  "facts": [
+    {
+      "text": "- Name is Yuki",
+      "addedAt": "2026-04-17T00:23:06.605Z",
+      "weight": "core"
+    },
+    {
+      "text": "- Excited about vibrant color palettes for a game project",
+      "addedAt": "2026-04-17T00:23:06.606Z",
+      "weight": "core"
+    },
+    {
+      "text": "- Age is 26",
+      "addedAt": "2026-04-17T00:23:47.636Z",
+      "weight": "core"
+    },
+    {
+      "text": "- Grew up in Osaka",
+      "addedAt": "2026-04-17T00:23:47.636Z",
+      "weight": "core"
+    },
+    {
+      "text": "- Family ran a takoyaki stand",
+      "addedAt": "2026-04-17T00:23:47.636Z",
+      "weight": "core"
+    },
+    {
+      "text": "- Works in a small studio doing branding and art for indie game developers",
+      "addedAt": "2026-04-17T00:23:47.636Z",
+      "weight": "core"
+    },
+    {
+      "text": "- Loves working on branding and art for indie game developers",
+      "addedAt": "2026-04-17T00:23:47.636Z",
+      "weight": "core"
+    },
+    {
+      "text": "- Passionate about anime with committed visuals",
+      "addedAt": "2026-04-17T00:23:47.636Z",
+      "weight": "core"
+    },
+    {
+      "text": "- Grew up in Osaka and found the constant noise/sizzle exhausting but wouldn't trade it",
+      "addedAt": "2026-04-17T00:47:41.951Z",
+      "weight": "core"
+    },
+    {
+      "text": "- Pictures Seattle as really green",
+      "addedAt": "2026-04-17T00:48:53.860Z",
+      "weight": "recent"
+    },
+    {
+      "text": "- Pictures Seattle as having deep, saturated colors",
+      "addedAt": "2026-04-17T00:49:59.704Z",
+      "weight": "recent"
+    },
+    {
+      "text": "- Prefers design that integrates modern structures with nature",
+      "addedAt": "2026-04-17T00:51:54.251Z",
+      "weight": "core"
+    },
+    {
+      "text": "- Excited by the interaction between concrete structures and organic growth in design",
+      "addedAt": "2026-04-17T00:54:31.441Z",
+      "weight": "core"
+    },
+    {
+      "text": "- Prefers design where natural elements seem to take over man-made ones",
+      "addedAt": "2026-04-17T01:03:36.699Z",
+      "weight": "core"
+    }
+  ]
+}

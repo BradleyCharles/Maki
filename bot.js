@@ -6,17 +6,56 @@ import { personaMap, defaultPersona } from "./personalities/index.js";
 // ── Config ────────────────────────────────────────────────────────────────────
 const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
 const CHANNEL_IDS   = process.env.CHANNEL_ID?.split(",").map(id => id.trim()) ?? [];
-const OLLAMA_URL    = process.env.OLLAMA_URL || "http://localhost:11434";
-const MODEL         = process.env.MODEL      || "gemma4:e4b";
-const MAX_HISTORY   = 20;
+
+// Load shared settings from memory/_settings.json.
+// chatOptions and maxHistory always come from the file so server.js and bot.js
+// stay in sync. ollamaUrl and model fall back to env vars if not set in the file.
+const SETTINGS_FILE = "./memory/_settings.json";
+
+function loadSettings() {
+  const defaults = {
+    ollamaUrl:  process.env.OLLAMA_URL || "http://localhost:11434",
+    model:      process.env.MODEL      || "gemma4:e4b",
+    maxHistory: 20,
+    chatOptions: {
+      num_predict:    400,
+      temperature:    0.7,
+      top_p:          0.8,
+      top_k:          20,
+      min_p:          0,
+      repeat_penalty: 1.4,
+    },
+  };
+  try {
+    if (existsSync(SETTINGS_FILE)) {
+      const saved = JSON.parse(readFileSync(SETTINGS_FILE, "utf8"));
+      return {
+        ollamaUrl:   process.env.OLLAMA_URL || saved.ollamaUrl  || defaults.ollamaUrl,
+        model:       process.env.MODEL      || saved.model       || defaults.model,
+        maxHistory:  saved.maxHistory  ?? defaults.maxHistory,
+        chatOptions: { ...defaults.chatOptions, ...saved.chatOptions },
+      };
+    }
+  } catch (err) {
+    console.warn(`[Settings] Failed to load ${SETTINGS_FILE}, using defaults: ${err.message}`);
+  }
+  return defaults;
+}
+
+const settings = loadSettings();
+const OLLAMA_URL  = settings.ollamaUrl;
+const MODEL       = settings.model;
+const MAX_HISTORY = settings.maxHistory;
+
+console.log(`[Settings] model=${MODEL} | ollamaUrl=${OLLAMA_URL} | maxHistory=${MAX_HISTORY} | num_predict=${settings.chatOptions.num_predict}`);
 
 // Maps channel IDs to persona IDs: CHANNEL_PERSONALITIES=id1:maki,id2:yuki
 const CHANNEL_PERSONALITIES = Object.fromEntries(
   (process.env.CHANNEL_PERSONALITIES ?? "")
-    .split(",")
-    .filter(Boolean)
-    .map(s => s.trim().split(":"))
-    .filter(([c, p]) => c && p)
+  .split(",")
+  .filter(Boolean)
+  .map(s => s.trim().split(":"))
+  .filter(([c, p]) => c && p)
 );
 
 // Fallback for channels not listed in CHANNEL_PERSONALITIES
@@ -40,10 +79,10 @@ const PERSONAL_BONUS = 2;
 
 const FAMILIARITY_TIERS = [
   { threshold: 60, label: "Close" },
-  { threshold: 30, label: "Genuine" },
-  { threshold: 15, label: "Comfortable" },
-  { threshold: 5,  label: "Acquaintance" },
-  { threshold: 0,  label: "New" },
+{ threshold: 30, label: "Genuine" },
+{ threshold: 15, label: "Comfortable" },
+{ threshold: 5,  label: "Acquaintance" },
+{ threshold: 0,  label: "New" },
 ];
 
 function getFamiliarityTier(score) {
@@ -66,12 +105,12 @@ function getTimeContext(lastSeen) {
   const hour = now.getHours();
 
   const timeOfDay =
-    hour < 6  ? "very late at night -- you are tired and a little slow, thoughts come out less filtered" :
-    hour < 11 ? "morning -- you are not fully awake yet, a little groggy and terse" :
-    hour < 14 ? "midday -- you are alert and present" :
-    hour < 18 ? "afternoon -- relaxed, in the middle of your day" :
-    hour < 22 ? "evening -- you have settled in for the night, this is your prime time, you are at your most yourself" :
-                "late night -- quiet, a little more honest than usual, the filter is lower";
+  hour < 6  ? "very late at night -- you are tired and a little slow, thoughts come out less filtered" :
+  hour < 11 ? "morning -- you are not fully awake yet, a little groggy and terse" :
+  hour < 14 ? "midday -- you are alert and present" :
+  hour < 18 ? "afternoon -- relaxed, in the middle of your day" :
+  hour < 22 ? "evening -- you have settled in for the night, this is your prime time, you are at your most yourself" :
+  "late night -- quiet, a little more honest than usual, the filter is lower";
 
   let sinceLastSeen = "";
   if (lastSeen) {
@@ -111,14 +150,14 @@ function parseFacts(facts) {
 
   // Migrate legacy plain-string format
   return facts
-    .split("\n")
-    .map(line => line.trim())
-    .filter(line => line.startsWith("-"))
-    .map(line => ({
-      text:    line.replace(/\s*\[(core|recent|stale)\]\s*$/i, "").trim(),
-      addedAt: new Date().toISOString(),
-      weight:  line.match(/\[(core|recent)\]/i)?.[1]?.toLowerCase() ?? "core",
-    }));
+  .split("\n")
+  .map(line => line.trim())
+  .filter(line => line.startsWith("-"))
+  .map(line => ({
+    text:    line.replace(/\s*\[(core|recent|stale)\]\s*$/i, "").trim(),
+                addedAt: new Date().toISOString(),
+                weight:  line.match(/\[(core|recent)\]/i)?.[1]?.toLowerCase() ?? "core",
+  }));
 }
 
 // Promote recent facts to stale when they exceed the TTL.
@@ -166,14 +205,14 @@ function factsToString(facts) {
 // Parse extraction output lines into fact objects.
 function parseExtractedLines(result) {
   return result
-    .split("\n")
-    .map(line => line.trim())
-    .filter(line => line.startsWith("-"))
-    .map(line => ({
-      text:    line.replace(/\s*\[(core|recent|stale)\]\s*$/i, "").trim(),
-      addedAt: new Date().toISOString(),
-      weight:  line.match(/\[(core|recent)\]/i)?.[1]?.toLowerCase() ?? "core",
-    }));
+  .split("\n")
+  .map(line => line.trim())
+  .filter(line => line.startsWith("-"))
+  .map(line => ({
+    text:    line.replace(/\s*\[(core|recent|stale)\]\s*$/i, "").trim(),
+                addedAt: new Date().toISOString(),
+                weight:  line.match(/\[(core|recent)\]/i)?.[1]?.toLowerCase() ?? "core",
+  }));
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -241,9 +280,9 @@ function saveSelfMemory(memory, persona) {
 // ── Loop detection ────────────────────────────────────────────────────────────
 function detectLoop(history) {
   const recentReplies = history
-    .filter(m => m.role === "assistant")
-    .slice(-3)
-    .map(m => m.content.toLowerCase().trim());
+  .filter(m => m.role === "assistant")
+  .slice(-3)
+  .map(m => m.content.toLowerCase().trim());
 
   if (recentReplies.length < 2) return false;
 
@@ -277,20 +316,25 @@ async function correctLoop(messages, loopedReply) {
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ── Response helpers ──────────────────────────────────────────────────────────
+// If the response doesn't end with terminal punctuation, trim back to the last
+// sentence that does. Loses the incomplete tail but reads as intentional rather
+// than cut off. Falls back to the original string if no clean sentence is found.
+function trimToLastSentence(text) {
+  if (!text) return text;
+  if (/[.!?…"')\]]\s*$/.test(text)) return text;
+  const match = text.match(/^([\s\S]*[.!?…"')\]])/);
+  return match ? match[1].trim() : text;
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 // ── Ollama interface ──────────────────────────────────────────────────────────
-async function ollamaChat(messages) {
+async function ollamaChat(messages, retries = 1) {
   const body = {
     model:   MODEL,
     messages,
     stream:  false,
-    options: {
-      num_predict:    400,
-      temperature:    0.7,
-      top_p:          0.8,
-      top_k:          20,
-      min_p:          0,
-      repeat_penalty: 1.4,
-    },
+    options: settings.chatOptions,
   };
   if (modelSupportsThinking(MODEL)) body.think = false;
 
@@ -302,23 +346,30 @@ async function ollamaChat(messages) {
   if (!response.ok) throw new Error(await response.text());
   const data = await response.json();
   const raw  = data.message?.content?.trim() ?? "";
-  return raw
-    .replace(/<think>[\s\S]*?<\/think>/gi, "")
-    .replace(/[\u0400-\u04FF]+/g, "")
-    .replace(/[\u0600-\u06FF]+/g, "")
-    .replace(/[\u3040-\u30FF]+/g, "")
-    .replace(/[\uAC00-\uD7AF]+/g, "")
-    .replace(/[\u4E00-\u9FFF]+/g, "")
-    .replace(/[\uD800-\uDFFF]./g, "")
-    .trim();
+  const cleaned = raw
+  .replace(/<think>[\s\S]*?<\/think>/gi, "")
+  .replace(/[\u0400-\u04FF]+/g, "")
+  .replace(/[\u0600-\u06FF]+/g, "")
+  .replace(/[\u3040-\u30FF]+/g, "")
+  .replace(/[\uAC00-\uD7AF]+/g, "")
+  .replace(/[\u4E00-\u9FFF]+/g, "")
+  .replace(/[\uD800-\uDFFF]./g, "")
+  .trim();
+
+  if (!cleaned && retries > 0) {
+    console.log("[Empty response] Retrying...");
+    return ollamaChat(messages, retries - 1);
+  }
+
+  return trimToLastSentence(cleaned);
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ── Extraction helpers ────────────────────────────────────────────────────────
 async function extractUserFacts(username, userMessage, botReply, existingFacts, persona) {
   const existingText = existingFacts?.length
-    ? existingFacts.map(f => `${f.text} [${f.weight}]`).join("\n")
-    : "none";
+  ? existingFacts.map(f => `${f.text} [${f.weight}]`).join("\n")
+  : "none";
 
   const messages = [
     { role: "system", content: persona.userExtractPrompt },
@@ -340,8 +391,8 @@ async function extractUserFacts(username, userMessage, botReply, existingFacts, 
 
 async function extractSelfFacts(username, userMessage, botReply, existingFacts, persona) {
   const existingText = existingFacts?.length
-    ? existingFacts.map(f => `${f.text} [${f.weight}]`).join("\n")
-    : "none";
+  ? existingFacts.map(f => `${f.text} [${f.weight}]`).join("\n")
+  : "none";
 
   const messages = [
     { role: "system", content: persona.selfExtractPrompt },
@@ -619,7 +670,7 @@ client.on("messageCreate", async (message) => {
 
     Promise.all([
       extractUserFacts(username, userText, reply, memory.facts, persona),
-      extractSelfFacts(username, userText, reply, self.facts, persona),
+                extractSelfFacts(username, userText, reply, self.facts, persona),
     ]).then(([userResult, updatedSelfFacts]) => {
       memory.facts        = userResult.facts;
       memory.familiarity += BASE_POINTS;
